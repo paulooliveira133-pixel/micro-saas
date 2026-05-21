@@ -1,0 +1,6 @@
+{
+  "name": "SaaS de Agendamento Barbearia Imperial",
+  "description": "Plataforma completa para gestão de salões e barbearias. Inclui painel administrativo do proprietário, página de reservas do cliente com disponibilidade em tempo real, envio de confirmações e análise de churn impulsionada por IA (Gemini).",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
