@@ -1379,6 +1379,27 @@ export default function AdminPanel({ onOpenQRCode, salonId }: AdminPanelProps) {
                             <div className="text-right">
                               <span className="block text-[9px] text-slate-500 uppercase">Assinantes</span>
                               <span className="text-slate-300 font-bold text-xs">{countAssoc} usuários ativos</span>
+                             <button
+                                onClick={async () => {
+                                const res = await window.fetch("/api/pagamento/criar", {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({
+                                planName: plan.name,
+                                planPrice: plan.price,
+                                 customerEmail: "cliente@email.com",
+                                 customerName: establishment?.name || "Cliente",
+                               salonId: salonId
+                                })
+                               });
+                                  const data = await res.json();
+                                 if (data.checkoutUrl) window.open(data.checkoutUrl, "_blank");
+                                else alert("Erro ao gerar link");
+                                 }}
+                                  className="mt-3 w-full py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-xs uppercase cursor-pointer"
+                               >
+                               💳 Assinar — {formatBRL(plan.price)}/mês
+                            </button>
                             </div>
                           </div>
                         </div>
