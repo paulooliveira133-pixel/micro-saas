@@ -1006,7 +1006,7 @@ async function bootstrapServer() {
     });
   }
 
-  app.post("/api/pagamento/criar", async (req: any, res: any) => { try { const b = req.body; const r = await fetch("https://api.mercadopago.com/checkout/preferences", { method: "POST", headers: { "Content-Type": "application/json", "Authorization": `Bearer ${process.env.MP_ACCESS_TOKEN}` }, body: JSON.stringify({ items: [{ title: b.planName || "Plano", quantity: 1, currency_id: "BRL", unit_price: Number(b.planPrice) }], payer: { email: b.customerEmail || "cliente@email.com" }, back_urls: { success: "http://localhost:3000", failure: "http://localhost:3000", pending: "http://localhost:3000" }, auto_return: "approved" }) }); const d = await r.json(); if (d.id) return res.json({ success: true, checkoutUrl: d.init_point }); return res.status(400).json({ success: false, error: d }); } catch (e) { return res.status(500).json({ success: false }); } });
+  
   app.listen(PORT, "0.0.0.0", () => {
     console.log(`[FULLSTACK SUCCESS] Server running on http://localhost:${PORT}`);
   });
