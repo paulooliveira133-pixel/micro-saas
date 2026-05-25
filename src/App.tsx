@@ -57,12 +57,11 @@ export default function App() {
   const [isQRCodeOpen, setIsQRCodeOpen] = useState(false);
 
   // Persistent authentication states loaded from localStorage
-  const [saasLoggedIn, setSaasLoggedIn] = useState<boolean>(() => {
-    return localStorage.getItem("autodireto_saas_auth") === "true";
-  });
+  const [saasLoggedIn, setSaasLoggedIn] = useState<boolean>(false);
 
   const [tenantLoggedIn, setTenantLoggedIn] = useState<Record<string, boolean>>(() => {
     try {
+      if (typeof window === "undefined") return {};
       return JSON.parse(localStorage.getItem("autodireto_tenant_auths") || "{}");
     } catch (e) {
       return {};
