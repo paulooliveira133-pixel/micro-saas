@@ -93,7 +93,6 @@ export default function App() {
     setTenantLoggedIn(nextAuths);
     localStorage.setItem("autodireto_tenant_auths", JSON.stringify(nextAuths));
     setCurrentView('admin');
-    window.location.reload();
   };
 
   // Sync active tenant on the window object for custom API request routing
