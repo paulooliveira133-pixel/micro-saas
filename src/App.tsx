@@ -84,12 +84,16 @@ export default function App() {
   const handleSaasLogout = () => {
     setSaasLoggedIn(false);
     localStorage.removeItem("autodireto_saas_auth");
+    setCurrentView('saas');
+    window.location.reload();
   };
 
   const handleTenantLogout = () => {
     const nextAuths = { ...tenantLoggedIn, [activeTenantId]: false };
     setTenantLoggedIn(nextAuths);
     localStorage.setItem("autodireto_tenant_auths", JSON.stringify(nextAuths));
+    setCurrentView('admin');
+    window.location.reload();
   };
 
   // Sync active tenant on the window object for custom API request routing
