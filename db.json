@@ -1,224 +1,470 @@
 {
-  "establishment": {
-    "id": "establishment-default",
-    "name": "Barbearia Imperial",
-    "phone": "+55 (11) 98765-4321",
-    "openTime": "09:00",
-    "closeTime": "20:00",
-    "address": "Avenida Paulista, 1000 - Bela Vista, São Paulo - SP",
-    "whatsappApiKey": "api_key_demo_whatsapp_123456",
-    "webhookUrl": "https://api.evolution.example.com/webhook/send",
-    "logoUrl": "",
-    "theme": "light"
-  },
-  "services": [
+  "tenants": [
     {
-      "id": "srv-1",
-      "name": "Corte Degradê Moderno",
-      "durationMin": 30,
-      "price": 50
+      "id": "imperial",
+      "slug": "imperial",
+      "establishment": {
+        "id": "establishment-default",
+        "name": "Barbearia Imperial",
+        "phone": "+55 (11) 98765-4321",
+        "openTime": "09:00",
+        "closeTime": "20:00",
+        "address": "Avenida Paulista, 1000 - Bela Vista, São Paulo - SP",
+        "whatsappApiKey": "api_key_demo_whatsapp_123456",
+        "webhookUrl": "https://api.evolution.example.com/webhook/send",
+        "logoUrl": "",
+        "theme": "dark",
+        "customDomain": "",
+        "adminUsername": "gerente"
+      },
+      "services": [
+        {
+          "id": "srv-1",
+          "name": "Corte Degradê Moderno",
+          "durationMin": 30,
+          "price": 50
+        },
+        {
+          "id": "srv-2",
+          "name": "Barba Terapia com Toalha Quente",
+          "durationMin": 30,
+          "price": 35
+        },
+        {
+          "id": "srv-3",
+          "name": "Combo Imperial (Corte + Barba)",
+          "durationMin": 60,
+          "price": 75
+        },
+        {
+          "id": "srv-4",
+          "name": "Selagem Térmica Capilar",
+          "durationMin": 90,
+          "price": 120
+        },
+        {
+          "id": "srv-5",
+          "name": "Penteado Especial & Gel Fixador",
+          "durationMin": 20,
+          "price": 30
+        }
+      ],
+      "professionals": [
+        {
+          "id": "pro-1",
+          "name": "Felipe Navalha",
+          "role": "Barbeiro Sênior (Degradê & Visagismo)",
+          "active": true
+        },
+        {
+          "id": "pro-2",
+          "name": "Gustavo Tesoura",
+          "role": "Cabeleireiro & Visagista",
+          "active": true
+        },
+        {
+          "id": "pro-3",
+          "name": "Amanda Designer",
+          "role": "Especialista em Tratamentos & Barba",
+          "active": true
+        }
+      ],
+      "appointments": [
+        {
+          "id": "apt-1",
+          "customerId": "cust-1",
+          "customerName": "Carlos Silva",
+          "customerPhone": "+55 (11) 91111-2222",
+          "professionalId": "pro-1",
+          "serviceId": "srv-1",
+          "date": "2026-05-20",
+          "time": "10:00",
+          "status": "concluido",
+          "createdAt": "2026-05-18T14:30:00Z"
+        },
+        {
+          "id": "apt-2",
+          "customerId": "cust-2",
+          "customerName": "Rodrigo Santos",
+          "customerPhone": "+55 (11) 92222-3333",
+          "professionalId": "pro-1",
+          "serviceId": "srv-2",
+          "date": "2026-05-20",
+          "time": "11:00",
+          "status": "concluido",
+          "createdAt": "2026-05-19T09:15:00Z"
+        },
+        {
+          "id": "apt-3",
+          "customerId": "cust-3",
+          "customerName": "Thiago Lima",
+          "customerPhone": "+55 (11) 93333-4444",
+          "professionalId": "pro-2",
+          "serviceId": "srv-3",
+          "date": "2026-05-20",
+          "time": "15:00",
+          "status": "cancelado",
+          "createdAt": "2026-05-19T10:45:00Z"
+        },
+        {
+          "id": "apt-4",
+          "customerId": "cust-4",
+          "customerName": "Bruno Alencar",
+          "customerPhone": "+55 (11) 94444-5555",
+          "professionalId": "pro-1",
+          "serviceId": "srv-3",
+          "date": "2026-05-21",
+          "time": "09:30",
+          "status": "concluido",
+          "createdAt": "2026-05-20T08:00:00Z"
+        },
+        {
+          "id": "apt-5",
+          "customerId": "cust-5",
+          "customerName": "Marcelo Oliveira",
+          "customerPhone": "+55 (11) 95555-6666",
+          "professionalId": "pro-2",
+          "serviceId": "srv-1",
+          "date": "2026-05-21",
+          "time": "14:00",
+          "status": "agendado",
+          "createdAt": "2026-05-20T16:20:00Z"
+        },
+        {
+          "id": "apt-6",
+          "customerId": "cust-6",
+          "customerName": "Lucas Souza",
+          "customerPhone": "+55 (11) 96666-7777",
+          "professionalId": "pro-3",
+          "serviceId": "srv-4",
+          "date": "2026-05-21",
+          "time": "16:00",
+          "status": "agendado",
+          "createdAt": "2026-05-20T11:00:00Z"
+        },
+        {
+          "id": "apt-7",
+          "customerId": "cust-1",
+          "customerName": "Carlos Silva",
+          "customerPhone": "+55 (11) 91111-2222",
+          "professionalId": "pro-1",
+          "serviceId": "srv-2",
+          "date": "2026-05-22",
+          "time": "10:30",
+          "status": "agendado",
+          "createdAt": "2026-05-21T10:15:00Z"
+        },
+        {
+          "id": "apt-8",
+          "customerId": "cust-7",
+          "customerName": "Vinicius Nogueira",
+          "customerPhone": "+55 (11) 97777-8888",
+          "professionalId": "pro-2",
+          "serviceId": "srv-1",
+          "date": "2026-05-22",
+          "time": "11:00",
+          "status": "agendado",
+          "createdAt": "2026-05-21T12:00:00Z"
+        }
+      ],
+      "notificationLogs": [
+        {
+          "id": "log-1",
+          "appointmentId": "apt-4",
+          "recipient": "Bruno Alencar",
+          "recipientPhone": "+55 (11) 94444-5555",
+          "message": "Olá Bruno! Seu agendamento de Combo Imperial com Felipe Navalha na Barbearia Imperial está confirmado para hoje, 21/05 às 09:30. Esperamos você!",
+          "status": "sent",
+          "timestamp": "2026-05-21T08:00:00Z",
+          "type": "confirmation"
+        },
+        {
+          "id": "log-2",
+          "appointmentId": "apt-5",
+          "recipient": "Marcelo Oliveira",
+          "recipientPhone": "+55 (11) 95555-6666",
+          "message": "Olá Marcelo! Seu agendamento de Corte Degradê Moderno com Gustavo Tesoura na Barbearia Imperial está confirmado para hoje, 21/05 às 14:00. Esperamos você!",
+          "status": "sent",
+          "timestamp": "2026-05-21T09:00:00Z",
+          "type": "confirmation"
+        }
+      ],
+      "plans": [
+        {
+          "id": "plan-1",
+          "name": "Plano Cabelo na Régua",
+          "price": 80,
+          "description": "Corte seu cabelo até 2 vezes por mês e garanta desconto em outros serviços adicionais.",
+          "servicesIncluded": [
+            "srv-1"
+          ],
+          "limitCount": 2,
+          "active": true
+        },
+        {
+          "id": "plan-2",
+          "name": "Clube Imperial VIP",
+          "price": 140,
+          "description": "Cabelo e barba ilimitados! Venha quantas vezes precisar e saia sempre impecável.",
+          "servicesIncluded": [
+            "srv-1",
+            "srv-2",
+            "srv-3"
+          ],
+          "limitCount": 999,
+          "active": true
+        }
+      ],
+      "subscribers": [
+        {
+          "id": "sub-1",
+          "customerName": "Carlos Silva",
+          "customerPhone": "+55 (11) 91111-2222",
+          "planId": "plan-2",
+          "status": "ativo",
+          "startDate": "2026-05-01"
+        },
+        {
+          "id": "sub-2",
+          "customerName": "Rodrigo Santos",
+          "customerPhone": "+55 (11) 92222-3333",
+          "planId": "plan-1",
+          "status": "ativo",
+          "startDate": "2026-05-10"
+        }
+      ]
     },
     {
-      "id": "srv-2",
-      "name": "Barba Terapia com Toalha Quente",
-      "durationMin": 30,
-      "price": 35
-    },
-    {
-      "id": "srv-3",
-      "name": "Combo Imperial (Corte + Barba)",
-      "durationMin": 60,
-      "price": 75
-    },
-    {
-      "id": "srv-4",
-      "name": "Selagem Térmica Capilar",
-      "durationMin": 90,
-      "price": 120
-    },
-    {
-      "id": "srv-5",
-      "name": "Penteado Especial & Gel Fixador",
-      "durationMin": 20,
-      "price": 30
-    }
-  ],
-  "professionals": [
-    {
-      "id": "pro-1",
-      "name": "Felipe Navalha",
-      "role": "Barbeiro Sênior (Degradê & Visagismo)",
-      "active": true
-    },
-    {
-      "id": "pro-2",
-      "name": "Gustavo Tesoura",
-      "role": "Cabeleireiro & Visagista",
-      "active": true
-    },
-    {
-      "id": "pro-3",
-      "name": "Amanda Designer",
-      "role": "Especialista em Tratamentos & Barba",
-      "active": true
-    }
-  ],
-  "appointments": [
-    {
-      "id": "apt-1",
-      "customerId": "cust-1",
-      "customerName": "Carlos Silva",
-      "customerPhone": "+55 (11) 91111-2222",
-      "professionalId": "pro-1",
-      "serviceId": "srv-1",
-      "date": "2026-05-20",
-      "time": "10:00",
-      "status": "concluido",
-      "createdAt": "2026-05-18T14:30:00Z"
-    },
-    {
-      "id": "apt-2",
-      "customerId": "cust-2",
-      "customerName": "Rodrigo Santos",
-      "customerPhone": "+55 (11) 92222-3333",
-      "professionalId": "pro-1",
-      "serviceId": "srv-2",
-      "date": "2026-05-20",
-      "time": "11:00",
-      "status": "concluido",
-      "createdAt": "2026-05-19T09:15:00Z"
-    },
-    {
-      "id": "apt-3",
-      "customerId": "cust-3",
-      "customerName": "Thiago Lima",
-      "customerPhone": "+55 (11) 93333-4444",
-      "professionalId": "pro-2",
-      "serviceId": "srv-3",
-      "date": "2026-05-20",
-      "time": "15:00",
-      "status": "cancelado",
-      "createdAt": "2026-05-19T10:45:00Z"
-    },
-    {
-      "id": "apt-4",
-      "customerId": "cust-4",
-      "customerName": "Bruno Alencar",
-      "customerPhone": "+55 (11) 94444-5555",
-      "professionalId": "pro-1",
-      "serviceId": "srv-3",
-      "date": "2026-05-21",
-      "time": "09:30",
-      "status": "concluido",
-      "createdAt": "2026-05-20T08:00:00Z"
-    },
-    {
-      "id": "apt-5",
-      "customerId": "cust-5",
-      "customerName": "Marcelo Oliveira",
-      "customerPhone": "+55 (11) 95555-6666",
-      "professionalId": "pro-2",
-      "serviceId": "srv-1",
-      "date": "2026-05-21",
-      "time": "14:00",
-      "status": "agendado",
-      "createdAt": "2026-05-20T16:20:00Z"
-    },
-    {
-      "id": "apt-6",
-      "customerId": "cust-6",
-      "customerName": "Lucas Souza",
-      "customerPhone": "+55 (11) 96666-7777",
-      "professionalId": "pro-3",
-      "serviceId": "srv-4",
-      "date": "2026-05-21",
-      "time": "16:00",
-      "status": "agendado",
-      "createdAt": "2026-05-20T11:00:00Z"
-    },
-    {
-      "id": "apt-7",
-      "customerId": "cust-1",
-      "customerName": "Carlos Silva",
-      "customerPhone": "+55 (11) 91111-2222",
-      "professionalId": "pro-1",
-      "serviceId": "srv-2",
-      "date": "2026-05-22",
-      "time": "10:30",
-      "status": "agendado",
-      "createdAt": "2026-05-21T10:15:00Z"
-    },
-    {
-      "id": "apt-8",
-      "customerId": "cust-7",
-      "customerName": "Vinicius Nogueira",
-      "customerPhone": "+55 (11) 97777-8888",
-      "professionalId": "pro-2",
-      "serviceId": "srv-1",
-      "date": "2026-05-22",
-      "time": "11:00",
-      "status": "agendado",
-      "createdAt": "2026-05-21T12:00:00Z"
-    }
-  ],
-  "notificationLogs": [
-    {
-      "id": "log-1",
-      "appointmentId": "apt-4",
-      "recipient": "Bruno Alencar",
-      "recipientPhone": "+55 (11) 94444-5555",
-      "message": "Olá Bruno! Seu agendamento de Combo Imperial com Felipe Navalha na Barbearia Imperial está confirmado para hoje, 21/05 às 09:30. Esperamos você!",
-      "status": "sent",
-      "timestamp": "2026-05-21T08:00:00Z",
-      "type": "confirmation"
-    },
-    {
-      "id": "log-2",
-      "appointmentId": "apt-5",
-      "recipient": "Marcelo Oliveira",
-      "recipientPhone": "+55 (11) 95555-6666",
-      "message": "Olá Marcelo! Seu agendamento de Corte Degradê Moderno com Gustavo Tesoura na Barbearia Imperial está confirmado para hoje, 21/05 às 14:00. Esperamos você!",
-      "status": "sent",
-      "timestamp": "2026-05-21T09:00:00Z",
-      "type": "confirmation"
-    }
-  ],
-  "plans": [
-    {
-      "id": "plan-1",
-      "name": "Plano Cabelo na Régua",
-      "price": 80,
-      "description": "Corte seu cabelo até 2 vezes por mês e garanta desconto em outros serviços adicionais.",
-      "servicesIncluded": ["srv-1"],
-      "limitCount": 2,
-      "active": true
-    },
-    {
-      "id": "plan-2",
-      "name": "Clube Imperial VIP",
-      "price": 140,
-      "description": "Cabelo e barba ilimitados! Venha quantas vezes precisar e saia sempre impecável.",
-      "servicesIncluded": ["srv-1", "srv-2", "srv-3"],
-      "limitCount": 999,
-      "active": true
-    }
-  ],
-  "subscribers": [
-    {
-      "id": "sub-1",
-      "customerName": "Carlos Silva",
-      "customerPhone": "+55 (11) 91111-2222",
-      "planId": "plan-2",
-      "status": "ativo",
-      "startDate": "2026-05-01"
-    },
-    {
-      "id": "sub-2",
-      "customerName": "Rodrigo Santos",
-      "customerPhone": "+55 (11) 92222-3333",
-      "planId": "plan-1",
-      "status": "ativo",
-      "startDate": "2026-05-10"
+      "id": "bellavista",
+      "slug": "bellavista",
+      "establishment": {
+        "id": "bellavista",
+        "name": "Bella Vista Studio",
+        "phone": "+55 (11) 97777-6666",
+        "openTime": "09:00",
+        "closeTime": "20:00",
+        "address": "Rua Augusta, 450 - Consolação, São Paulo - SP",
+        "whatsappApiKey": "api_key_bellavista_demo_whatsapp_123456",
+        "webhookUrl": "https://api.evolution.example.com/webhook/send",
+        "adminUsername": "gerente",
+        "adminPassword": "gerente123"
+      },
+      "services": [
+        {
+          "id": "srv-1",
+          "name": "Corte Degradê Moderno",
+          "durationMin": 30,
+          "price": 50
+        },
+        {
+          "id": "srv-2",
+          "name": "Barba Terapia com Toalha Quente",
+          "durationMin": 30,
+          "price": 35
+        },
+        {
+          "id": "srv-3",
+          "name": "Combo Imperial (Corte + Barba)",
+          "durationMin": 60,
+          "price": 75
+        },
+        {
+          "id": "srv-4",
+          "name": "Selagem Térmica Capilar",
+          "durationMin": 90,
+          "price": 120
+        },
+        {
+          "id": "srv-5",
+          "name": "Penteado Especial & Gel Fixador",
+          "durationMin": 20,
+          "price": 30
+        }
+      ],
+      "professionals": [
+        {
+          "id": "pro-1",
+          "name": "Felipe Navalha",
+          "role": "Barbeiro Sênior (Degradê & Visagismo)",
+          "active": true
+        },
+        {
+          "id": "pro-2",
+          "name": "Gustavo Tesoura",
+          "role": "Cabeleireiro & Visagista",
+          "active": true
+        },
+        {
+          "id": "pro-3",
+          "name": "Amanda Designer",
+          "role": "Especialista em Tratamentos & Barba",
+          "active": true
+        }
+      ],
+      "appointments": [
+        {
+          "id": "apt-1",
+          "customerId": "cust-1",
+          "customerName": "Carlos Silva",
+          "customerPhone": "+55 (11) 91111-2222",
+          "professionalId": "pro-1",
+          "serviceId": "srv-1",
+          "date": "2026-05-20",
+          "time": "10:00",
+          "status": "concluido",
+          "createdAt": "2026-05-18T14:30:00Z"
+        },
+        {
+          "id": "apt-2",
+          "customerId": "cust-2",
+          "customerName": "Rodrigo Santos",
+          "customerPhone": "+55 (11) 92222-3333",
+          "professionalId": "pro-1",
+          "serviceId": "srv-2",
+          "date": "2026-05-20",
+          "time": "11:00",
+          "status": "concluido",
+          "createdAt": "2026-05-19T09:15:00Z"
+        },
+        {
+          "id": "apt-3",
+          "customerId": "cust-3",
+          "customerName": "Thiago Lima",
+          "customerPhone": "+55 (11) 93333-4444",
+          "professionalId": "pro-2",
+          "serviceId": "srv-3",
+          "date": "2026-05-20",
+          "time": "15:00",
+          "status": "cancelado",
+          "createdAt": "2026-05-19T10:45:00Z"
+        },
+        {
+          "id": "apt-4",
+          "customerId": "cust-4",
+          "customerName": "Bruno Alencar",
+          "customerPhone": "+55 (11) 94444-5555",
+          "professionalId": "pro-1",
+          "serviceId": "srv-3",
+          "date": "2026-05-21",
+          "time": "09:30",
+          "status": "concluido",
+          "createdAt": "2026-05-20T08:00:00Z"
+        },
+        {
+          "id": "apt-5",
+          "customerId": "cust-5",
+          "customerName": "Marcelo Oliveira",
+          "customerPhone": "+55 (11) 95555-6666",
+          "professionalId": "pro-2",
+          "serviceId": "srv-1",
+          "date": "2026-05-21",
+          "time": "14:00",
+          "status": "agendado",
+          "createdAt": "2026-05-20T16:20:00Z"
+        },
+        {
+          "id": "apt-6",
+          "customerId": "cust-6",
+          "customerName": "Lucas Souza",
+          "customerPhone": "+55 (11) 96666-7777",
+          "professionalId": "pro-3",
+          "serviceId": "srv-4",
+          "date": "2026-05-21",
+          "time": "16:00",
+          "status": "agendado",
+          "createdAt": "2026-05-20T11:00:00Z"
+        },
+        {
+          "id": "apt-7",
+          "customerId": "cust-1",
+          "customerName": "Carlos Silva",
+          "customerPhone": "+55 (11) 91111-2222",
+          "professionalId": "pro-1",
+          "serviceId": "srv-2",
+          "date": "2026-05-22",
+          "time": "10:30",
+          "status": "agendado",
+          "createdAt": "2026-05-21T10:15:00Z"
+        },
+        {
+          "id": "apt-8",
+          "customerId": "cust-7",
+          "customerName": "Vinicius Nogueira",
+          "customerPhone": "+55 (11) 97777-8888",
+          "professionalId": "pro-2",
+          "serviceId": "srv-1",
+          "date": "2026-05-22",
+          "time": "11:00",
+          "status": "agendado",
+          "createdAt": "2026-05-21T12:00:00Z"
+        }
+      ],
+      "notificationLogs": [
+        {
+          "id": "log-1",
+          "appointmentId": "apt-4",
+          "recipient": "Bruno Alencar",
+          "recipientPhone": "+55 (11) 94444-5555",
+          "message": "Olá Bruno! Seu agendamento de Combo Imperial com Felipe Navalha na Barbearia Imperial está confirmado para hoje, 21/05 às 09:30. Esperamos você!",
+          "status": "sent",
+          "timestamp": "2026-05-21T08:00:00Z",
+          "type": "confirmation"
+        },
+        {
+          "id": "log-2",
+          "appointmentId": "apt-5",
+          "recipient": "Marcelo Oliveira",
+          "recipientPhone": "+55 (11) 95555-6666",
+          "message": "Olá Marcelo! Seu agendamento de Corte Degradê Moderno com Gustavo Tesoura na Barbearia Imperial está confirmado para hoje, 21/05 às 14:00. Esperamos você!",
+          "status": "sent",
+          "timestamp": "2026-05-21T09:00:00Z",
+          "type": "confirmation"
+        }
+      ],
+      "plans": [
+        {
+          "id": "plan-1",
+          "name": "Plano Cabelo na Régua",
+          "price": 80,
+          "description": "Corte seu cabelo até 2 vezes por mês e garanta desconto em outros serviços adicionais.",
+          "servicesIncluded": [
+            "srv-1"
+          ],
+          "limitCount": 2,
+          "active": true
+        },
+        {
+          "id": "plan-2",
+          "name": "Clube Imperial VIP",
+          "price": 140,
+          "description": "Cabelo e barba ilimitados! Venha quantas vezes precisar e saia sempre impecável.",
+          "servicesIncluded": [
+            "srv-1",
+            "srv-2",
+            "srv-3"
+          ],
+          "limitCount": 999,
+          "active": true
+        }
+      ],
+      "subscribers": [
+        {
+          "id": "sub-1",
+          "customerName": "Carlos Silva",
+          "customerPhone": "+55 (11) 91111-2222",
+          "planId": "plan-2",
+          "status": "ativo",
+          "startDate": "2026-05-01"
+        },
+        {
+          "id": "sub-2",
+          "customerName": "Rodrigo Santos",
+          "customerPhone": "+55 (11) 92222-3333",
+          "planId": "plan-1",
+          "status": "ativo",
+          "startDate": "2026-05-10"
+        }
+      ]
     }
   ]
 }

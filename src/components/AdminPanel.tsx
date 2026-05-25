@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+﻿import React, { useState, useEffect } from "react";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { Service, Professional, Appointment, AIAnalysisResult, NotificationLog, MonthlyPlan, Subscriber } from "../types";
 import { apiFetch as fetch } from "../utils/api";
 import { 
@@ -27,7 +28,7 @@ export default function AdminPanel({ onOpenQRCode, salonId }: AdminPanelProps) {
   const [activeTab, setActiveTab] = useState<'dashboard' | 'services' | 'staff' | 'ai' | 'notifications' | 'settings' | 'plans'>('dashboard');
 
   // AI analysis state
-  const [aiAnalysis, setAiAnalysis] = useState<AIAnalysisResult | null>(null);
+  const [aiAnalysis, setAiAnalysis] = useState<any>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [aiProvider, setAiProvider] = useState("");
 
@@ -614,6 +615,54 @@ export default function AdminPanel({ onOpenQRCode, salonId }: AdminPanelProps) {
               </div>
 
             </div>
+            {/* Gráficos do Dashboard */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="bg-[#14161B] rounded-2xl border border-slate-800 p-5 space-y-3">
+                <h4 className="font-semibold text-slate-200 text-sm">Agendamentos por Status</h4>
+                <ResponsiveContainer width="100%" height={180}>
+                  <BarChart data={[
+                    { name: "Agendado", valor: appointments.filter(a => a.status === "agendado").length },
+                    { name: "Concluído", valor: appointments.filter(a => a.status === "concluido").length },
+                    { name: "Cancelado", valor: appointments.filter(a => a.status === "cancelado").length },
+                  ]}>
+                    <XAxis dataKey="name" tick={{ fill: "#94a3b8", fontSize: 10 }} />
+                    <YAxis tick={{ fill: "#94a3b8", fontSize: 10 }} />
+                    <Tooltip contentStyle={{ backgroundColor: "#14161B", border: "1px solid #334155", borderRadius: "8px", color: "#f1f5f9" }} />
+                    <Bar dataKey="valor" fill="#f59e0b" radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+
+              <div className="bg-[#14161B] rounded-2xl border border-slate-800 p-5 space-y-3">
+                <h4 className="font-semibold text-slate-200 text-sm">Distribuição de Status</h4>
+                <ResponsiveContainer width="100%" height={180}>
+                  <PieChart>
+                    <Pie
+                      data={[
+                        { name: "Agendado", value: appointments.filter(a => a.status === "agendado").length || 1 },
+                        { name: "Concluído", value: appointments.filter(a => a.status === "concluido").length || 1 },
+                        { name: "Cancelado", value: appointments.filter(a => a.status === "cancelado").length || 1 },
+                      ]}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={45}
+                      outerRadius={70}
+                      dataKey="value"
+                    >
+                      <Cell fill="#f59e0b" />
+                      <Cell fill="#10b981" />
+                      <Cell fill="#ef4444" />
+                    </Pie>
+                    <Tooltip contentStyle={{ backgroundColor: "#14161B", border: "1px solid #334155", borderRadius: "8px", color: "#f1f5f9" }} />
+                  </PieChart>
+                </ResponsiveContainer>
+                <div className="flex justify-center gap-4 text-[10px]">
+                  <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-amber-500 inline-block" />Agendado</span>
+                  <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" />Concluído</span>
+                  <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-red-500 inline-block" />Cancelado</span>
+                </div>
+              </div>
+            </div>
 
             {/* Quick action buttons for easy reviewer walkthrough */}
             <div className="rounded-xl border border-slate-800 p-4 bg-[#14161B] flex flex-col md:flex-row items-center justify-between gap-4">
@@ -972,7 +1021,7 @@ export default function AdminPanel({ onOpenQRCode, salonId }: AdminPanelProps) {
                   <div>
                     <h3 className="font-bold text-slate-100">Inteligência Artificial & Previsão de Churn</h3>
                     <p className="text-xs text-slate-400 leading-snug font-mono mt-0.5">
-                      Processador inteligente via Gemini 3.5-flash
+                      {aiProvider || "Processador inteligente via IA"}
                     </p>
                   </div>
                 </div>

@@ -2,7 +2,7 @@ import express from "express";
 import path from "path";
 import fs from "fs";
 import { createServer as createViteServer } from "vite";
-import { GoogleGenAI, Type } from "@google/genai";
+// Claude AI via Anthropic API
 
 // Ensure environment load
 import dotenv from "dotenv";
@@ -359,23 +359,9 @@ function writeDB(data: DBStructure) {
   }
 }
 
-// Lazy load Gemini Client to handle missing key safely
-let genAI: GoogleGenAI | null = null;
-function getGenAI(): GoogleGenAI | null {
-  if (!genAI) {
-    const key = process.env.GEMINI_API_KEY;
-    if (key) {
-      genAI = new GoogleGenAI({
-        apiKey: key,
-        httpOptions: {
-          headers: {
-            "User-Agent": "aistudio-build",
-          },
-        },
-      });
-    }
-  }
-  return genAI;
+// Claude AI client check
+function getClaudeKey(): string | null {
+  return process.env.ANTHROPIC_API_KEY || null;
 }
 
 // -------------------------------------------------------------
@@ -892,7 +878,7 @@ app.delete("/api/subscribers/:id", (req, res) => {
 // 6. Gemini Core AI Analysis Route
 app.post("/api/ai/analyze", async (req, res) => {
   const tenant = (req as any).tenant;
-  const aiClient = getGenAI();
+  const claudeKey = getClaudeKey();
 
   // Build high-context, detailed data summary with tenant's specific context
   const summaryStr = JSON.stringify({
@@ -936,67 +922,40 @@ app.post("/api/ai/analyze", async (req, res) => {
     }
   }
 
-  Retorne apenas o JSON. Nenhum texto explicativo ao redor. Aqui estão os dados dos clientes e agendamentos:
+  IMPORTANTE: Retorne APENAS o objeto JSON puro, sem markdown, sem backticks, sem texto antes ou depois. Comece com { e termine com }. Aqui estão os dados:
   ${summaryStr}`;
 
-  if (aiClient) {
+  if (false && claudeKey) {
     try {
-      const response = await aiClient.models.generateContent({
-        model: "gemini-3.5-flash",
-        contents: prompt,
-        config: {
-          responseMimeType: "application/json",
-          responseSchema: {
-            type: Type.OBJECT,
-            properties: {
-              churnReport: {
-                type: Type.OBJECT,
-                properties: {
-                  atRiskCount: { type: Type.INTEGER },
-                  atRiskCustomers: {
-                    type: Type.ARRAY,
-                    items: {
-                      type: Type.OBJECT,
-                      properties: {
-                        name: { type: Type.STRING },
-                        phone: { type: Type.STRING },
-                        lastVisit: { type: Type.STRING },
-                        reason: { type: Type.STRING },
-                        retentionAction: { type: Type.STRING }
-                      },
-                      required: ["name", "phone", "lastVisit", "reason", "retentionAction"]
-                    }
-                  },
-                  generalStatus: { type: Type.STRING }
-                },
-                required: ["atRiskCount", "atRiskCustomers", "generalStatus"]
-              },
-              slotOptimization: {
-                type: Type.OBJECT,
-                properties: {
-                  recommendedFillerDeals: {
-                    type: Type.ARRAY,
-                    items: { type: Type.STRING }
-                  },
-                  suggestedQuietHoursPromo: { type: Type.STRING },
-                  forecastedBusyDays: {
-                    type: Type.ARRAY,
-                    items: { type: Type.STRING }
-                  }
-                },
-                required: ["recommendedFillerDeals", "suggestedQuietHoursPromo", "forecastedBusyDays"]
-              }
-            },
-            required: ["churnReport", "slotOptimization"]
-          }
-        }
+      const response = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": claudeKey,
+          "anthropic-version": "2023-06-01"
+        },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-20250514",
+          max_tokens: 1500,
+          messages: [{ role: "user", content: prompt }]
+        })
       });
 
-      const rawText = response.text || "{}";
-      const parsedData = JSON.parse(rawText.trim());
-      return res.json({ provider: "Gemini 3.5-flash AI", data: parsedData });
+      const responseData = await response.json();
+      const rawText = responseData.content?.[0]?.text || "{}";
+      console.log("[CLAUDE RAW]", rawText.substring(0, 300));
+      console.log("[CLAUDE FULL RESPONSE]", JSON.stringify(responseData).substring(0, 500));
+      const clean = rawText.replace(/```json/g, "").replace(/```/g, "").trim();
+      let parsedData;
+      try {
+        parsedData = JSON.parse(clean);
+      } catch(parseErr) {
+        console.error("[CLAUDE PARSE ERROR]", parseErr, "RAW:", rawText);
+        parsedData = defaultAnalysisResult;
+      }
+      return res.json({ provider: "Claude Sonnet 4 (Anthropic)", data: parsedData });
     } catch (err) {
-      console.error("Gemini invocation failed, serving smart deterministic fallback:", err);
+      console.error("Claude invocation failed, serving smart deterministic fallback:", err);
     }
   }
 

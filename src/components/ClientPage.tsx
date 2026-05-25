@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+﻿import React, { useState, useEffect } from "react";
 import { Service, Professional, Appointment, MonthlyPlan, Subscriber } from "../types";
 import { apiFetch as fetch } from "../utils/api";
 import { Calendar, Clock, Smile, Sparkles, CheckCircle2, AlertCircle, Scissors, PhoneCall, ChevronRight, CornerDownRight, MessageSquareCode, TrendingUp, Sparkle } from "lucide-react";
@@ -288,7 +288,7 @@ export default function ClientPage({ salonId, onNavigateToAdmin }: ClientPagePro
   const isLight = establishment?.theme === "light";
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between selection:bg-emerald-500/30 relative">
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between selection:bg-emerald-500/30 relative overflow-x-hidden">
       {isLight && (
         <style dangerouslySetInnerHTML={{ __html: `
           :root {
@@ -389,7 +389,7 @@ export default function ClientPage({ salonId, onNavigateToAdmin }: ClientPagePro
                   "{notificationToast.message}"
                 </p>
                 <div className="flex items-center gap-1.5 text-[10px] text-slate-400 pt-1 font-mono">
-                  <span className="text-emerald-500">✔ Sent successfully</span>
+                  <span className="text-emerald-500">âœ” Sent successfully</span>
                   <span>via Evolution API Webhook</span>
                 </div>
               </div>
@@ -400,39 +400,38 @@ export default function ClientPage({ salonId, onNavigateToAdmin }: ClientPagePro
  
        {/* Header */}
        <header className="border-b border-slate-900 bg-slate-900/40 backdrop-blur-md sticky top-0 z-40">
-         <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
-           <div className="flex items-center gap-2.5">
-             <div className="h-9 w-9 bg-emerald-500 rounded-xl flex items-center justify-center text-slate-950 shadow-lg shadow-emerald-500/20 overflow-hidden shrink-0">
-               {establishment?.logoUrl ? (
-                 <img src={establishment.logoUrl} alt="Logo" className="h-full w-full object-cover" />
-               ) : (
-                 <Scissors className="h-5 w-5 -rotate-45" />
-               )}
-             </div>
-             <div>
-               <h1 className="font-bold text-base text-slate-100 leading-tight">
-                 {establishment ? establishment.name : "Carregando Salão..."}
-               </h1>
-               <p className="text-[10px] text-emerald-400 font-mono uppercase tracking-wider">
-                 Agendamento Online PWA
-               </p>
-             </div>
-           </div>
-          
+        <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="h-10 w-10 bg-emerald-500 rounded-xl flex items-center justify-center text-slate-950 shadow-lg shadow-emerald-500/20 overflow-hidden shrink-0">
+              {establishment?.logoUrl ? (
+                <img src={establishment.logoUrl} alt="Logo" className="h-full w-full object-cover" />
+              ) : (
+                <Scissors className="h-5 w-5 -rotate-45" />
+              )}
+            </div>
+            <div className="min-w-0">
+              <h1 className="font-bold text-sm sm:text-base text-slate-100 leading-tight truncate">
+                {establishment ? establishment.name : "Carregando..."}
+              </h1>
+              <p className="text-[10px] text-emerald-400 font-mono uppercase tracking-wider hidden sm:block">
+                Agendamento Online
+              </p>
+            </div>
+          </div>
           <button
             onClick={onNavigateToAdmin}
-            className="flex items-center gap-1.5 rounded-lg border border-slate-800 bg-slate-900 hover:bg-slate-800 px-3 py-1.5 text-xs font-medium text-slate-300 transition-colors cursor-pointer font-mono"
+            className="flex items-center gap-1 rounded-lg border border-slate-800 bg-slate-900 hover:bg-slate-800 px-2.5 py-1.5 text-[11px] font-medium text-slate-300 transition-colors cursor-pointer shrink-0"
           >
-            <span>Painel Administrativo</span>
+            <span className="hidden sm:inline">Painel</span>
             <ChevronRight className="h-3 w-3" />
           </button>
         </div>
       </header>
 
       {/* Main Container */}
-      <main className="flex-grow max-w-4xl w-full mx-auto px-4 py-8 space-y-6">
+      <main className="flex-grow max-w-4xl w-full mx-auto px-3 sm:px-4 py-4 sm:py-8 space-y-4 sm:space-y-6">
         {/* Navigation Tabs for Client View */}
-        <div className="flex gap-2 p-1.5 bg-slate-900 border border-slate-800 rounded-xl w-full sm:max-w-md mx-auto">
+        <div className="flex gap-1.5 p-1.5 bg-slate-900 border border-slate-800 rounded-xl w-full sm:max-w-md mx-auto">
           <button
             onClick={() => setActiveMainView('booking')}
             className={`flex-1 py-2 px-4 rounded-lg text-xs font-bold transition-all uppercase tracking-wider cursor-pointer flex items-center justify-center gap-2 ${
@@ -474,7 +473,7 @@ export default function ClientPage({ salonId, onNavigateToAdmin }: ClientPagePro
               </span>
               <h2 className="text-xl font-bold text-slate-50 tracking-tight">Clube de Assinaturas {establishment?.name || "Premium"}</h2>
               <p className="text-xs text-slate-400 max-w-xl mx-auto leading-relaxed">
-                Escolha o plano mensal que melhor se adapta às suas necessidades e cuide do seu estilo com visitas recorrentes programadas. Pague uma vez por mês e agende sem atritos!
+                Escolha o plano mensal que melhor se adapta Ã s suas necessidades e cuide do seu estilo com visitas recorrentes programadas. Pague uma vez por mês e agende sem atritos!
               </p>
             </div>
 
@@ -516,7 +515,7 @@ export default function ClientPage({ salonId, onNavigateToAdmin }: ClientPagePro
                   }}
                   className="w-full py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-black font-bold rounded-xl text-xs uppercase font-mono tracking-wider transition-all cursor-pointer"
                 >
-                  Agendar Meu Primeiro Horário do Clube →
+                  Agendar Meu Primeiro Horário do Clube â†’
                 </button>
               </motion.div>
             ) : joiningPlan ? (
@@ -581,7 +580,7 @@ export default function ClientPage({ salonId, onNavigateToAdmin }: ClientPagePro
               </div>
             ) : (
               /* LIST PLANS AVAILABLE BOX */
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                 {plans.map(plan => (
                   <div key={plan.id} className="bg-slate-900/60 rounded-2xl border border-slate-800 p-6 flex flex-col justify-between hover:border-slate-700 transition-all shadow-lg hover:shadow-emerald-900/5 group">
                     <div className="space-y-3">
@@ -679,7 +678,7 @@ export default function ClientPage({ salonId, onNavigateToAdmin }: ClientPagePro
                   <h3 className="font-semibold text-slate-200">Selecione o Serviço</h3>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {services.map((srv) => (
                     <div
                       key={srv.id}
@@ -762,7 +761,7 @@ export default function ClientPage({ salonId, onNavigateToAdmin }: ClientPagePro
 
                 {/* Day selector carousel */}
                 <div className="space-y-2">
-                  <label className="text-xs font-medium text-slate-400 font-mono block">DIAS DISPONÍVEIS</label>
+                  <label className="text-xs font-medium text-slate-400 font-mono block">DIAS DISPONÃVEIS</label>
                   <div className="flex gap-2.5 overflow-x-auto pb-2 scrollbar-none">
                     {availableDays.map((day) => (
                       <button
@@ -788,7 +787,7 @@ export default function ClientPage({ salonId, onNavigateToAdmin }: ClientPagePro
                 {/* Grid of Hours */}
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <label className="text-xs font-medium text-slate-400 font-mono block">HORÁRIOS DA AGENDA</label>
+                    <label className="text-xs font-medium text-slate-400 font-mono block">HORÃRIOS DA AGENDA</label>
                     <span className="text-[10px] text-slate-500 font-mono flex items-center gap-1">
                       <Clock className="w-2.5 h-2.5" /> Intervalos de 30 minutos
                     </span>
@@ -853,7 +852,7 @@ export default function ClientPage({ salonId, onNavigateToAdmin }: ClientPagePro
                         : "bg-slate-950 text-slate-400 border-slate-800 hover:text-slate-250"
                     }`}
                   >
-                    {isClubSubscriber ? "✕ Usar Reserva Comum" : "⚡ Tenho Plano Mensal (Clube)"}
+                    {isClubSubscriber ? "âœ• Usar Reserva Comum" : "âš¡ Tenho Plano Mensal (Clube)"}
                   </button>
                 </div>
 
@@ -896,7 +895,7 @@ export default function ClientPage({ salonId, onNavigateToAdmin }: ClientPagePro
                       </div>
                     ) : subscriberPhoneMatch.length > 5 ? (
                       <p className="text-[10px] text-red-400 font-mono">
-                        Nenhum assinante do clube VIP correspondente encontrado para este número. Digite outro ou use o modo comum!
+                        Nenhum assinante do clube VIP correspondente encontrado para este nÃºmero. Digite outro ou use o modo comum!
                       </p>
                     ) : null}
                   </div>
@@ -910,7 +909,7 @@ export default function ClientPage({ salonId, onNavigateToAdmin }: ClientPagePro
                         placeholder="Ex: João Silva"
                         value={customerName}
                         onChange={(e) => setCustomerName(e.target.value)}
-                        className="w-full rounded-xl border border-slate-800 bg-slate-950/50 px-4 py-3 text-sm text-slate-100 outline-none focus:border-emerald-500/60 transition-colors"
+                        className="w-full rounded-xl border border-slate-800 bg-slate-950/50 px-4 py-3.5 text-base sm:text-sm text-slate-100 outline-none focus:border-emerald-500/60 transition-colors"
                       />
                     </div>
                     <div className="space-y-1.5">
@@ -973,12 +972,12 @@ export default function ClientPage({ salonId, onNavigateToAdmin }: ClientPagePro
 
                   {/* Scheduled Slot */}
                   <div className="space-y-1">
-                    <span className="block text-[10px] font-semibold text-slate-500 font-mono">DATA & INÍCIO</span>
+                    <span className="block text-[10px] font-semibold text-slate-500 font-mono">DATA & INÃCIO</span>
                     {selectedDate && selectedTime ? (
                       <div className="bg-slate-950 p-2.5 rounded-lg border border-slate-800 text-xs text-slate-200 flex items-center gap-2">
                         <Calendar className="h-4 w-4 text-emerald-400" />
                         <span>
-                          {selectedDate.split("-").reverse().join("/")} às <strong>{selectedTime}</strong>
+                          {selectedDate.split("-").reverse().join("/")} Ã s <strong>{selectedTime}</strong>
                         </span>
                       </div>
                     ) : (
@@ -1028,7 +1027,7 @@ export default function ClientPage({ salonId, onNavigateToAdmin }: ClientPagePro
                     onClick={onNavigateToAdmin}
                     className="text-xs font-bold text-emerald-400 hover:text-emerald-300 underline font-mono cursor-pointer"
                   >
-                    Voltar ao Painel Administrativo →
+                    Voltar ao Painel Administrativo â†’
                   </button>
                </div>
             </div>
@@ -1066,7 +1065,7 @@ export default function ClientPage({ salonId, onNavigateToAdmin }: ClientPagePro
                 </div>
                 <div>
                   <span className="block text-[9px] font-mono text-slate-500 uppercase">SERVIÇO</span>
-                  <span>{selectedService?.name} — {selectedService && formatPrice(selectedService.price)}</span>
+                  <span>{selectedService?.name} â€” {selectedService && formatPrice(selectedService.price)}</span>
                 </div>
                 <div className="grid grid-cols-2 gap-2 pt-1">
                   <div>
@@ -1074,7 +1073,7 @@ export default function ClientPage({ salonId, onNavigateToAdmin }: ClientPagePro
                     <span>{selectedDate.split('-').reverse().join('/')}</span>
                   </div>
                   <div>
-                    <span className="block text-[9px] font-mono text-slate-500 uppercase">HORÁRIO</span>
+                    <span className="block text-[9px] font-mono text-slate-500 uppercase">HORÃRIO</span>
                     <span>{selectedTime}</span>
                   </div>
                 </div>
@@ -1112,7 +1111,7 @@ export default function ClientPage({ salonId, onNavigateToAdmin }: ClientPagePro
         <div className="max-w-4xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
           <span>© 2026 {establishment ? establishment.name : "Barbearia Imperial"} • Todos os direitos reservados.</span>
           <div className="flex gap-4">
-            <span className="text-emerald-400 animate-pulse">● Whatsapp API Online</span>
+            <span className="text-emerald-400 animate-pulse">● WhatsApp API Online</span>
             <span>Estilo & Tradição</span>
           </div>
         </div>
@@ -1121,3 +1120,4 @@ export default function ClientPage({ salonId, onNavigateToAdmin }: ClientPagePro
     </div>
   );
 }
+

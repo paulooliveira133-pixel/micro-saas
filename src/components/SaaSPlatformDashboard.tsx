@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+﻿import React, { useState, useEffect } from "react";
 import { 
   Building2, 
   Plus, 
@@ -177,7 +177,7 @@ export default function SaaSPlatformDashboard({ onSelectTenant, activeTenantId, 
         <div className="relative z-10 space-y-4">
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-amber-500/10 text-amber-500 border border-amber-500/20 rounded-full font-mono text-[10px] uppercase tracking-wider font-semibold">
             <Cpu className="h-3 w-3" />
-            Super Painel SaaS • Administrador Geral
+            Super Painel SaaS â€¢ Administrador Geral
           </div>
           <div className="max-w-4xl space-y-2">
             <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
@@ -359,7 +359,7 @@ export default function SaaSPlatformDashboard({ onSelectTenant, activeTenantId, 
                                 target="_blank"
                                 rel="noreferrer"
                                 className="px-2 py-1 rounded-md bg-amber-500/10 border border-amber-500/25 text-amber-500 hover:text-amber-400 hover:bg-amber-500/20 font-bold text-[10px] uppercase transition-all tracking-wide flex items-center gap-1 cursor-pointer"
-                                title="Abrir página pública do salão em nova aba do navegador"
+                                title="Abrir página pÃºblica do salão em nova aba do navegador"
                               >
                                 Abrir site
                                 <ExternalLink className="h-2.5 w-2.5" />
@@ -465,7 +465,7 @@ export default function SaaSPlatformDashboard({ onSelectTenant, activeTenantId, 
                     type="text"
                     value={newSalonAddress}
                     onChange={(e) => setNewSalonAddress(e.target.value)}
-                    placeholder="Rua, Número, Bairro, Cidade - UF"
+                    placeholder="Rua, NÃºmero, Bairro, Cidade - UF"
                     className="w-full bg-slate-950/80 hover:bg-slate-950 border border-slate-800 rounded-xl py-2.5 pl-10 pr-4 text-xs text-white focus:border-amber-500 outline-none transition-all placeholder:text-slate-600"
                   />
                 </div>
@@ -494,7 +494,7 @@ export default function SaaSPlatformDashboard({ onSelectTenant, activeTenantId, 
 
               <div className="grid grid-cols-2 gap-3 md:col-span-2 bg-[#0A0B0D] p-4.5 rounded-2xl border border-slate-900/60 p-4">
                 <div className="space-y-1.5 col-span-2 text-[10px] font-mono text-amber-500 uppercase tracking-widest font-bold">
-                  🔑 Credenciais do Dono do Salão (Administrativo)
+                  ðŸ”‘ Credenciais do Dono do Salão (Administrativo)
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-[9px] font-mono uppercase tracking-wider text-slate-400 block">Usuário de Login *</label>
@@ -577,13 +577,13 @@ export default function SaaSPlatformDashboard({ onSelectTenant, activeTenantId, 
                     <strong>Totalmente pronto para produção!</strong> A arquitetura de multi-inquilinos (multi-tenant) já está programada para identificar o domínio principal e subdomínios automaticamente:
                   </p>
                   <p>
-                    • <strong>Painel SaaS Principal</strong>: Ao acessar diretamente <code className="text-amber-400 font-mono">https://autodireto.online</code>, a plataforma reconhece o host raiz e serve este dashboard administrativo global automaticamente.
+                    â€¢ <strong>Painel SaaS Principal</strong>: Ao acessar diretamente <code className="text-amber-400 font-mono">https://autodireto.online</code>, a plataforma reconhece o host raiz e serve este dashboard administrativo global automaticamente.
                   </p>
                   <p>
-                    • <strong>Agendadores de Clientes</strong>: Ao criar subdomínios (ex: <code className="text-amber-400 font-mono">bellavista.autodireto.online</code> ou <code className="text-amber-400 font-mono">imperial.autodireto.online</code>), o backend intercepta o cabeçalho de Host, faz o isolamento da partição de dados e abre diretamente a tela de agendamentos daquela barbearia, ocultando os menus do SaaS para o cliente final.
+                    â€¢ <strong>Agendadores de Clientes</strong>: Ao criar subdomínios (ex: <code className="text-amber-400 font-mono">bellavista.autodireto.online</code> ou <code className="text-amber-400 font-mono">imperial.autodireto.online</code>), o backend intercepta o cabeçalho de Host, faz o isolamento da partição de dados e abre diretamente a tela de agendamentos daquela barbearia, ocultando os menus do SaaS para o cliente final.
                   </p>
                   <p>
-                    • <strong>Aponte no seu DNS (Cloudflare/GoDaddy)</strong>: Adicione um registro <code className="text-amber-400 font-mono">A</code> apontando o domínio raiz para o IP do seu contêiner Cloud Run, e crie uma entrada <code className="text-amber-400 font-mono">CNAME</code> coringa (<code className="text-amber-400 font-mono">*</code>) apontando para o seu domínio principal para que qualquer novo salão cadastrado tenha seu link ativo de imediato!
+                    â€¢ <strong>Aponte no seu DNS (Cloudflare/GoDaddy)</strong>: Adicione um registro <code className="text-amber-400 font-mono">A</code> apontando o domínio raiz para o IP do seu contêiner Cloud Run, e crie uma entrada <code className="text-amber-400 font-mono">CNAME</code> coringa (<code className="text-amber-400 font-mono">*</code>) apontando para o seu domínio principal para que qualquer novo salão cadastrado tenha seu link ativo de imediato!
                   </p>
                 </div>
               </div>
@@ -603,7 +603,7 @@ export default function SaaSPlatformDashboard({ onSelectTenant, activeTenantId, 
               <div className="text-slate-300 font-bold uppercase flex items-center gap-1 mb-1">
                 <Cpu className="h-3 w-3 text-amber-500" /> Engenharia SaaS Pronta
               </div>
-              <p>Mapeamento de banco em db.json com partições automáticas. O middleware dinâmico do servidor isola as consultas de modo seguro por cabeçalhos e cookies.</p>
+              <p>Mapeamento de banco em db.json com partições automáticas. O middleware dinÃ¢mico do servidor isola as consultas de modo seguro por cabeçalhos e cookies.</p>
             </div>
           </div>
 
@@ -614,7 +614,7 @@ export default function SaaSPlatformDashboard({ onSelectTenant, activeTenantId, 
               Instruções de Teste Multi
             </div>
             <p className="leading-relaxed">
-              Deseja testar outro salão parceiro? Cadastre um com o slug <strong>"bellavista"</strong> ou mude para o Bella Vista Studio na tabela acima de forma dinâmica. Experimente preencher agendamentos, ver os gráficos mudarem no painel e disparar lembretes exclusivos.
+              Deseja testar outro salão parceiro? Cadastre um com o slug <strong>"bellavista"</strong> ou mude para o Bella Vista Studio na tabela acima de forma dinÃ¢mica. Experimente preencher agendamentos, ver os gráficos mudarem no painel e disparar lembretes exclusivos.
             </p>
           </div>
 
@@ -625,3 +625,4 @@ export default function SaaSPlatformDashboard({ onSelectTenant, activeTenantId, 
     </div>
   );
 }
+
