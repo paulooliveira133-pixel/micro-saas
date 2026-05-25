@@ -57,7 +57,9 @@ export default function App() {
   const [isQRCodeOpen, setIsQRCodeOpen] = useState(false);
 
   // Persistent authentication states loaded from localStorage
-  const [saasLoggedIn, setSaasLoggedIn] = useState<boolean>(false);
+  const [saasLoggedIn, setSaasLoggedIn] = useState<boolean>(() => {
+    try { return localStorage.getItem("autodireto_saas_auth") === "true"; } catch { return false; }
+  });
 
   const [tenantLoggedIn, setTenantLoggedIn] = useState<Record<string, boolean>>(() => {
     try {
@@ -85,6 +87,7 @@ export default function App() {
     setSaasLoggedIn(false);
     localStorage.removeItem("autodireto_saas_auth");
     setCurrentView('saas');
+    window.location.href = window.location.pathname + "?view=saas";
   };
 
   const handleTenantLogout = () => {
@@ -92,6 +95,7 @@ export default function App() {
     setTenantLoggedIn(nextAuths);
     localStorage.setItem("autodireto_tenant_auths", JSON.stringify(nextAuths));
     setCurrentView('admin');
+    window.location.href = window.location.pathname + "?view=admin&tenant=" + activeTenantId;
   };
 
   // Sync active tenant on the window object for custom API request routing
