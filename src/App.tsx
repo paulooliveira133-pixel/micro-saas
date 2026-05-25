@@ -85,7 +85,6 @@ export default function App() {
     setSaasLoggedIn(false);
     localStorage.removeItem("autodireto_saas_auth");
     setCurrentView('saas');
-    window.location.reload();
   };
 
   const handleTenantLogout = () => {
