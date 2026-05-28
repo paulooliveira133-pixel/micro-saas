@@ -1,0 +1,118 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  
+}
+
+model Tenant {
+  id            String   @id @default(cuid())
+  slug          String   @unique
+  name          String   @default("Meu Salão")
+  phone         String   @default("")
+  openTime      String   @default("09:00")
+  closeTime     String   @default("20:00")
+  address       String   @default("")
+  whatsappApiKey String  @default("")
+  webhookUrl    String   @default("")
+  logoUrl       String   @default("")
+  theme         String   @default("dark")
+  customDomain  String   @default("")
+  adminUsername String   @default("gerente")
+  adminPassword String   @default("admin123")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  services      Service[]
+  professionals Professional[]
+  appointments  Appointment[]
+  plans         Plan[]
+  subscribers   Subscriber[]
+  notifications Notification[]
+}
+
+model Service {
+  id          String   @id @default(cuid())
+  name        String
+  durationMin Int      @default(30)
+  price       Float    @default(50)
+  active      Boolean  @default(true)
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+
+  appointments Appointment[]
+  plans        Plan[]        @relation("PlanServices")
+}
+
+model Professional {
+  id       String  @id @default(cuid())
+  name     String
+  role     String
+  active   Boolean @default(true)
+  tenantId String
+  tenant   Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  appointments Appointment[]
+}
+
+model Appointment {
+  id             String   @id @default(cuid())
+  customerName   String
+  customerPhone  String
+  date           String
+  time           String
+  status         String   @default("agendado")
+  tenantId       String
+  tenant         Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  serviceId      String
+  service        Service  @relation(fields: [serviceId], references: [id])
+  professionalId String
+  professional   Professional @relation(fields: [professionalId], references: [id])
+  createdAt      DateTime @default(now())
+}
+
+model Plan {
+  id               String   @id @default(cuid())
+  name             String
+  price            Float
+  description      String   @default("")
+  limitCount       Int      @default(4)
+  tenantId         String
+  tenant           Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  createdAt        DateTime @default(now())
+
+  services     Service[]     @relation("PlanServices")
+  subscribers  Subscriber[]
+}
+
+model Subscriber {
+  id           String   @id @default(cuid())
+  customerName String
+  customerPhone String
+  status       String   @default("ativo")
+  startDate    String
+  tenantId     String
+  tenant       Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  planId       String
+  plan         Plan     @relation(fields: [planId], references: [id])
+  createdAt    DateTime @default(now())
+}
+
+model Notification {
+  id             String   @id @default(cuid())
+  type           String
+  recipient      String
+  recipientPhone String
+  message        String
+  status         String   @default("enviado")
+  appointmentId  String
+  tenantId       String
+  tenant         Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  createdAt      DateTime @default(now())
+}
+
+
+
