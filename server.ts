@@ -5,6 +5,7 @@ import { createServer as createViteServer } from "vite";
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import * as dotenv from "dotenv";
+import bcrypt from "bcryptjs";
 dotenv.config();
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! });
@@ -34,7 +35,8 @@ app.post("/api/auth/tenant", async (req: any, res) => {
   const tenantId = req.headers["x-tenant-id"] as string;
   const tenant = await prisma.tenant.findUnique({ where: { slug: tenantId } });
   if (!tenant) return res.status(404).json({ error: "Tenant não encontrado" });
-  if (tenant.adminUsername === username && tenant.adminPassword === password) {
+  const passwordMatch = await bcrypt.compare(password, tenant.adminPassword).catch(() => password === tenant.adminPassword);
+  if (tenant.adminUsername === username && passwordMatch) {
     return res.json({ success: true, tenant: { id: tenant.id, name: tenant.name } });
   }
   return res.status(401).json({ error: "Credenciais inválidas" });
@@ -83,7 +85,7 @@ app.post("/api/establishment", async (req: any, res) => {
       theme: req.body.theme || tenant.theme,
       customDomain: req.body.customDomain ?? tenant.customDomain,
       adminUsername: req.body.adminUsername || tenant.adminUsername,
-      adminPassword: req.body.adminPassword || tenant.adminPassword,
+      adminPassword: req.body.adminPassword ? await bcrypt.hash(req.body.adminPassword, 10) : tenant.adminPassword, 
     },
   });
   res.json({ success: true, tenant: updated });
