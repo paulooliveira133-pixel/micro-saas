@@ -463,18 +463,161 @@ app.post("/api/saas/register", async (req, res) => {
   return res.json({ success: true, slug: tenant.slug });
 });
 
-// ─── REGISTRO PÚBLICO DE NOVO TENANT ───
+// ─── VERIFICAÇÃO DE TRIAL ───
+// Adicione esta rota no server.ts, junto com as outras rotas /api/auth/
+app.get("/api/auth/trial-status", async (req: any, res) => {
+  const tenantId = req.headers["x-tenant-id"] as string;
+  if (!tenantId) return res.status(400).json({ error: "Tenant não informado" });
+
+  const tenant = await prisma.tenant.findUnique({ where: { slug: tenantId } });
+  if (!tenant) return res.status(404).json({ error: "Tenant não encontrado" });
+
+  const now = new Date();
+  const trialEndsAt = new Date(tenant.trialEndsAt);
+  const daysLeft = Math.ceil((trialEndsAt.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+
+  // Se planStatus já é "active", libera sempre
+  if (tenant.planStatus === "active") {
+    return res.json({ status: "active", daysLeft: null, expired: false });
+  }
+
+  // Trial ainda válido
+  if (now <= trialEndsAt) {
+    return res.json({ status: "trial", daysLeft: Math.max(0, daysLeft), expired: false });
+  }
+
+  // Trial expirado — atualiza planStatus no banco
+  await prisma.tenant.update({
+    where: { slug: tenantId },
+    data: { planStatus: "expired" },
+  });
+
+  return res.json({ status: "expired", daysLeft: 0, expired: true });
+});
+
+// ─── ATIVAR PLANO APÓS PAGAMENTO (webhook Mercado Pago ou manual) ───
+app.post("/api/saas/activate-plan", async (req, res) => {
+  const { slug } = req.body;
+  if (!slug) return res.status(400).json({ error: "Slug não informado" });
+
+  await prisma.tenant.update({
+    where: { slug },
+    data: { planStatus: "active" },
+  });
+
+  return res.json({ success: true });
+});
+
+// ─── REGISTRO: já inclui trialEndsAt automático via schema ───
+// (Substitua o app.post("/api/saas/register") existente por este)
 app.post("/api/saas/register", async (req, res) => {
   const { businessName, slug, phone, adminUsername, adminPassword } = req.body;
   if (!businessName || !slug || !adminUsername || !adminPassword)
     return res.status(400).json({ error: "Preencha todos os campos obrigatórios." });
+
   const cleanSlug = slug.toLowerCase().replace(/[^a-z0-9-]/g, "-");
   const existing = await prisma.tenant.findUnique({ where: { slug: cleanSlug } });
   if (existing) return res.status(409).json({ error: "Este identificador já está em uso. Tente outro." });
+
   const hashedPassword = await bcrypt.hash(adminPassword, 10);
+  const trialEndsAt = new Date();
+  trialEndsAt.setDate(trialEndsAt.getDate() + 14);
+
   const tenant = await prisma.tenant.create({
-    data: { name: businessName, slug: cleanSlug, phone: phone || "", adminUsername, adminPassword: hashedPassword },
+    data: {
+      name: businessName,
+      slug: cleanSlug,
+      phone: phone || "",
+      adminUsername,
+      adminPassword: hashedPassword,
+      trialEndsAt,
+      planStatus: "trial",
+    },
   });
+
   return res.json({ success: true, slug: tenant.slug });
 });
+
+// ─────────────────────────────────────────────────────
+// INSTRUÇÕES: Adicione estas alterações no AdminPanel.tsx
+// ─────────────────────────────────────────────────────
+
+// 1. Adicione este import no topo (junto com os outros imports):
+import TrialExpiredScreen from "./TrialExpiredScreen";
+
+// 2. Adicione estes states dentro do componente AdminPanel (junto com os outros useState):
+const [trialStatus, setTrialStatus] = useState<"trial" | "active" | "expired" | null>(null);
+const [trialDaysLeft, setTrialDaysLeft] = useState<number | null>(null);
+
+// 3. Adicione esta função dentro do componente (antes do return):
+const checkTrialStatus = async () => {
+  try {
+    const res = await fetch("/api/auth/trial-status");
+    const data = await res.json();
+    setTrialStatus(data.status);
+    setTrialDaysLeft(data.daysLeft);
+  } catch {
+    // Se falhar, não bloqueia o usuário
+    setTrialStatus("active");
+  }
+};
+
+// 4. Adicione o checkTrialStatus no useEffect que já existe (ou crie um novo):
+// Dentro do useEffect que chama loadDBState(), adicione:
+//   checkTrialStatus();
+
+// 5. No início do return(), ANTES do JSX principal, adicione:
+if (trialStatus === "expired") {
+  return <TrialExpiredScreen tenantName={establishment?.name || salonId} />;
+}
+
+// 6. Adicione o banner de aviso de trial (quando ainda em trial).
+// Cole isso logo após a abertura do return(), antes do primeiro <div> do painel:
+{trialStatus === "trial" && trialDaysLeft !== null && trialDaysLeft <= 7 && (
+  <div style={{
+    background: trialDaysLeft <= 3 ? "rgba(226,75,74,0.12)" : "rgba(201,168,76,0.08)",
+    border: `0.5px solid ${trialDaysLeft <= 3 ? "rgba(226,75,74,0.3)" : "rgba(201,168,76,0.25)"}`,
+    borderRadius: "2px",
+    padding: "0.75rem 1.25rem",
+    margin: "1rem",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: "1rem",
+    flexWrap: "wrap" as const,
+    fontFamily: "system-ui, sans-serif",
+  }}>
+    <span style={{ fontSize: "0.85rem", color: trialDaysLeft <= 3 ? "#F09595" : "#C9A84C" }}>
+      ⏳ {trialDaysLeft === 0
+        ? "Seu trial expira hoje!"
+        : `Seu período gratuito expira em ${trialDaysLeft} dia${trialDaysLeft > 1 ? "s" : ""}.`}
+    </span>
+    <a
+      href="/api/pagamento/criar"
+      onClick={async (e) => {
+        e.preventDefault();
+        const res = await fetch("/api/pagamento/criar", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ planName: "AgendaFácil Pro", planPrice: 99, customerEmail: "cliente@email.com" }),
+        });
+        const data = await res.json();
+        if (data.checkoutUrl) window.location.href = data.checkoutUrl;
+      }}
+      style={{
+        background: "#C9A84C",
+        color: "#0A0A0A",
+        padding: "0.4rem 1rem",
+        borderRadius: "2px",
+        fontSize: "0.8rem",
+        fontWeight: 500,
+        textDecoration: "none",
+        whiteSpace: "nowrap" as const,
+      }}
+    >
+      Assinar agora →
+    </a>
+  </div>
+)}
+
 bootstrapServer();

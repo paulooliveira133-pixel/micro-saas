@@ -4,7 +4,6 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  
 }
 
 model Tenant {
@@ -22,6 +21,11 @@ model Tenant {
   customDomain  String   @default("")
   adminUsername String   @default("gerente")
   adminPassword String   @default("admin123")
+
+  // ─── TRIAL / PLANO ───
+  trialEndsAt   DateTime @default(dbgenerated("NOW() + INTERVAL '14 days'"))
+  planStatus    String   @default("trial") // "trial" | "active" | "expired"
+
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
@@ -113,6 +117,3 @@ model Notification {
   tenant         Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   createdAt      DateTime @default(now())
 }
-
-
-
