@@ -411,6 +411,8 @@ app.post("/api/ai/analyze", async (req: any, res) => {
   });
 });
 
+
+
 // ─── SERVER BOOTSTRAP ───
 async function bootstrapServer() {
   if (process.env.NODE_ENV !== "production") {
@@ -430,4 +432,49 @@ async function bootstrapServer() {
   });
 }
 
+// ─── REGISTRO PÚBLICO DE NOVO TENANT ───
+app.post("/api/saas/register", async (req, res) => {
+  const { businessName, slug, phone, adminUsername, adminPassword } = req.body;
+
+  if (!businessName || !slug || !adminUsername || !adminPassword) {
+    return res.status(400).json({ error: "Preencha todos os campos obrigatórios." });
+  }
+
+  // Slug só letras minúsculas, números e hífen
+  const cleanSlug = slug.toLowerCase().replace(/[^a-z0-9-]/g, "-");
+
+  const existing = await prisma.tenant.findUnique({ where: { slug: cleanSlug } });
+  if (existing) {
+    return res.status(409).json({ error: "Este nome de usuário já está em uso. Tente outro." });
+  }
+
+  const hashedPassword = await bcrypt.hash(adminPassword, 10);
+
+  const tenant = await prisma.tenant.create({
+    data: {
+      name: businessName,
+      slug: cleanSlug,
+      phone: phone || "",
+      adminUsername,
+      adminPassword: hashedPassword,
+    },
+  });
+
+  return res.json({ success: true, slug: tenant.slug });
+});
+
+// ─── REGISTRO PÚBLICO DE NOVO TENANT ───
+app.post("/api/saas/register", async (req, res) => {
+  const { businessName, slug, phone, adminUsername, adminPassword } = req.body;
+  if (!businessName || !slug || !adminUsername || !adminPassword)
+    return res.status(400).json({ error: "Preencha todos os campos obrigatórios." });
+  const cleanSlug = slug.toLowerCase().replace(/[^a-z0-9-]/g, "-");
+  const existing = await prisma.tenant.findUnique({ where: { slug: cleanSlug } });
+  if (existing) return res.status(409).json({ error: "Este identificador já está em uso. Tente outro." });
+  const hashedPassword = await bcrypt.hash(adminPassword, 10);
+  const tenant = await prisma.tenant.create({
+    data: { name: businessName, slug: cleanSlug, phone: phone || "", adminUsername, adminPassword: hashedPassword },
+  });
+  return res.json({ success: true, slug: tenant.slug });
+});
 bootstrapServer();
