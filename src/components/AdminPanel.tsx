@@ -2,6 +2,7 @@
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { Service, Professional, Appointment, AIAnalysisResult, NotificationLog, MonthlyPlan, Subscriber } from "../types";
 import { apiFetch as fetch } from "../utils/api";
+import TrialExpiredScreen from "./TrialExpiredScreen";
 import { 
   Scissors, Calendar, Clock, Sparkles, Plus, Trash2, Save, QrCode, MessageSquare, 
   Settings, AlertTriangle, TrendingUp, UserCheck, RefreshCw, Play, Check, Search, 
@@ -57,6 +58,8 @@ export default function AdminPanel({ onOpenQRCode, salonId }: AdminPanelProps) {
 
   // Simulated notification banner or drafting feedback state
   const [draftedMessage, setDraftedMessage] = useState<string | null>(null);
+  const [trialStatus, setTrialStatus] = useState<"trial" | "active" | "expired" | null>(null);
+  const [trialDaysLeft, setTrialDaysLeft] = useState<number | null>(null);
 
   // Loader
   const loadDBState = async () => {
@@ -109,8 +112,15 @@ export default function AdminPanel({ onOpenQRCode, salonId }: AdminPanelProps) {
     }
   };
 
-  useEffect(() => {
-    loadDBState();
+ useEffect(() => {
+  loadDBState();
+  fetch("/api/auth/trial-status")
+    .then(r => r.json())
+    .then(data => {
+      setTrialStatus(data.status);
+      setTrialDaysLeft(data.daysLeft);
+    })
+    .catch(() => setTrialStatus("active"));
   }, []);
 
   // AI triggering API
@@ -338,6 +348,9 @@ export default function AdminPanel({ onOpenQRCode, salonId }: AdminPanelProps) {
 
   const isLight = establishment?.theme === "light";
 
+  if (trialStatus === "expired") {
+  return <TrialExpiredScreen tenantName={establishment?.name || salonId} />;
+}
   return (
     <div className="flex flex-col lg:flex-row min-h-screen bg-[#0A0B0D] text-slate-100 relative">
       {isLight && (
@@ -352,7 +365,7 @@ export default function AdminPanel({ onOpenQRCode, salonId }: AdminPanelProps) {
             --text-muted: #64748B !important;
           }
           /* Custom overrides for light mode */
-          body, .flex-row {
+          body, .flex-row {E
             background-color: var(--bg-main) !important;
             color: var(--text-secondary) !important;
           }
