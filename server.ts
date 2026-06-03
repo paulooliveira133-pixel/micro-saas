@@ -6,6 +6,8 @@ import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import * as dotenv from "dotenv";
 import bcrypt from "bcryptjs";
+import { Resend } from "resend";
+const resend = new Resend(process.env.RESEND_API_KEY);
 dotenv.config();
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! });
@@ -411,7 +413,124 @@ app.post("/api/ai/analyze", async (req: any, res) => {
   });
 });
 
+async function sendWelcomeEmail(to: string, businessName: string, slug: string) {
+  try {
+    await resend.emails.send({
+      from: "AgendaFácil <contato@autodireto.online>",
+      to,
+      subject: `Bem-vindo ao AgendaFácil, ${businessName}! 🎉`,
+      html: `
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin:0;padding:0;background:#0A0A0A;font-family:'DM Sans',system-ui,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#0A0A0A;padding:40px 0;">
+    <tr>
+      <td align="center">
+        <table width="560" cellpadding="0" cellspacing="0" style="background:#111111;border:1px solid rgba(201,168,76,0.2);border-radius:4px;overflow:hidden;">
+          
+          <!-- Header -->
+          <tr>
+            <td style="background:#0A0A0A;padding:32px 40px;border-bottom:1px solid rgba(201,168,76,0.15);">
+              <p style="margin:0;font-family:Georgia,serif;font-size:22px;font-weight:700;color:#C9A84C;letter-spacing:-0.02em;">AgendaFácil</p>
+            </td>
+          </tr>
 
+          <!-- Hero -->
+          <tr>
+            <td style="padding:40px 40px 24px;">
+              <p style="margin:0 0 8px;font-size:12px;letter-spacing:0.15em;text-transform:uppercase;color:#C9A84C;">✦ Conta criada com sucesso</p>
+              <h1 style="margin:0 0 16px;font-family:Georgia,serif;font-size:28px;font-weight:700;color:#FAFAF8;line-height:1.1;letter-spacing:-0.02em;">
+                Bem-vindo, ${businessName}!
+              </h1>
+              <p style="margin:0;font-size:15px;color:rgba(200,196,187,0.7);line-height:1.6;">
+                Sua conta foi criada com sucesso. Você tem <strong style="color:#C9A84C;">14 dias gratuitos</strong> para explorar tudo que o AgendaFácil tem a oferecer.
+              </p>
+            </td>
+          </tr>
+
+          <!-- Divider -->
+          <tr>
+            <td style="padding:0 40px;">
+              <div style="height:1px;background:rgba(255,255,255,0.06);"></div>
+            </td>
+          </tr>
+
+          <!-- Acesso -->
+          <tr>
+            <td style="padding:24px 40px;">
+              <p style="margin:0 0 12px;font-size:12px;letter-spacing:0.1em;text-transform:uppercase;color:rgba(200,196,187,0.5);">Seu acesso</p>
+              <table width="100%" cellpadding="0" cellspacing="0" style="background:#0A0A0A;border:1px solid rgba(201,168,76,0.15);border-radius:2px;">
+                <tr>
+                  <td style="padding:16px 20px;">
+                    <p style="margin:0 0 6px;font-size:12px;color:rgba(200,196,187,0.4);text-transform:uppercase;letter-spacing:0.05em;">Link do painel</p>
+                    <p style="margin:0;font-size:13px;color:#C9A84C;word-break:break-all;">https://autodireto.online/?tenant=${slug}&view=admin</p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Features -->
+          <tr>
+            <td style="padding:0 40px 24px;">
+              <p style="margin:0 0 16px;font-size:12px;letter-spacing:0.1em;text-transform:uppercase;color:rgba(200,196,187,0.5);">O que você pode fazer agora</p>
+              <table width="100%" cellpadding="0" cellspacing="0">
+                ${[
+                  ["📅", "Criar sua agenda de serviços"],
+                  ["👥", "Cadastrar sua equipe"],
+                  ["💳", "Receber pagamentos pelo Mercado Pago"],
+                  ["🤖", "Ativar a IA anti-churn"],
+                ].map(([icon, text]) => `
+                <tr>
+                  <td style="padding:6px 0;">
+                    <table cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td style="padding-right:12px;font-size:16px;">${icon}</td>
+                        <td style="font-size:14px;color:rgba(200,196,187,0.75);">${text}</td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>`).join("")}
+              </table>
+            </td>
+          </tr>
+
+          <!-- CTA -->
+          <tr>
+            <td style="padding:0 40px 40px;">
+              <a href="https://autodireto.online/?tenant=${slug}&view=admin"
+                style="display:block;text-align:center;background:#C9A84C;color:#0A0A0A;padding:14px;border-radius:2px;font-size:15px;font-weight:500;text-decoration:none;letter-spacing:0.02em;">
+                Acessar meu painel →
+              </a>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="padding:20px 40px;border-top:1px solid rgba(255,255,255,0.06);">
+              <p style="margin:0;font-size:12px;color:rgba(200,196,187,0.3);text-align:center;">
+                © 2025 AgendaFácil · <a href="mailto:contato@autodireto.online" style="color:rgba(201,168,76,0.5);text-decoration:none;">contato@autodireto.online</a>
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+      `,
+    });
+    console.log(`[EMAIL] Boas-vindas enviado para ${to}`);
+  } catch (err) {
+    console.error("[EMAIL] Erro ao enviar boas-vindas:", err);
+  }
+}
 
 // ─── SERVER BOOTSTRAP ───
 async function bootstrapServer() {
@@ -511,7 +630,8 @@ app.post("/api/saas/activate-plan", async (req, res) => {
 // ─── REGISTRO: já inclui trialEndsAt automático via schema ───
 // (Substitua o app.post("/api/saas/register") existente por este)
 app.post("/api/saas/register", async (req, res) => {
-  const { businessName, slug, phone, adminUsername, adminPassword } = req.body;
+  const { businessName, slug, phone, adminUsername, adminPassword, email } = req.body;
+
   if (!businessName || !slug || !adminUsername || !adminPassword)
     return res.status(400).json({ error: "Preencha todos os campos obrigatórios." });
 
@@ -534,6 +654,11 @@ app.post("/api/saas/register", async (req, res) => {
       planStatus: "trial",
     },
   });
+
+  // Envia email de boas-vindas se tiver email
+  if (email) {
+    await sendWelcomeEmail(email, businessName, cleanSlug);
+  }
 
   return res.json({ success: true, slug: tenant.slug });
 });
