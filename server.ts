@@ -414,6 +414,7 @@ app.post("/api/ai/analyze", async (req: any, res) => {
 });
 
 async function sendWelcomeEmail(to: string, businessName: string, slug: string) {
+  console.log("[EMAIL] Tentando enviar para:", to, "| Resend configurado:", !!resend);
   try {
     if (!resend) { console.error("[EMAIL] RESEND_API_KEY não configurada"); return; }
      await resend.emails.send({
