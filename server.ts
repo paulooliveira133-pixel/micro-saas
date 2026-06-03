@@ -7,7 +7,7 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import * as dotenv from "dotenv";
 import bcrypt from "bcryptjs";
 import { Resend } from "resend";
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 dotenv.config();
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! });
