@@ -416,7 +416,7 @@ app.post("/api/ai/analyze", async (req: any, res) => {
 async function sendWelcomeEmail(to: string, businessName: string, slug: string) {
   try {
     await resend.emails.send({
-      from: "AgendaFácil <contato@autodireto.online>",
+      from: "AgendaFácil <onboarding@resend.dev>",
       to,
       subject: `Bem-vindo ao AgendaFácil, ${businessName}! 🎉`,
       html: `
