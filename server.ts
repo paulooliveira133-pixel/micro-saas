@@ -550,14 +550,6 @@ async function bootstrapServer() {
 
   app.listen(PORT, "0.0.0.0", () => {
     console.log(`[FULLSTACK SUCCESS] Server running on http://localhost:${PORT}`);
-  });
-}
-
-// ─── REGISTRO PÚBLICO DE NOVO TENANT ───
-    },
-  });
-
-  return res.json({ success: true, slug: tenant.slug });
 });
 
 // ─── VERIFICAÇÃO DE TRIAL ───
