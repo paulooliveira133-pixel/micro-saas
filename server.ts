@@ -442,6 +442,10 @@ async function bootstrapServer() {
     const express2 = await import("express");
     app.use(express2.default.static(distPath));
     app.get("*", (req, res) => {
+      // Landing page na raiz
+      if (req.path === "/" && !req.query.tenant && !req.query.register && !req.query.view) {
+        return res.sendFile(path.join(process.cwd(), "public", "landing.html"));
+      }
       res.sendFile(path.join(distPath, "index.html"));
     });
   }
@@ -451,11 +455,10 @@ async function bootstrapServer() {
 }
 
 // ─── LANDING PAGE ───
-app.get("/", (req, res) => {
-  const params = req.query;
-  if (params.tenant || params.register || params.view) {
-    return res.sendFile(path.join(process.cwd(), "dist", "index.html"));
+app.get("*", (req, res) => {
+  if (req.path === "/" && !req.query.tenant && !req.query.register && !req.query.view) {
+    return res.sendFile(path.join(process.cwd(), "public", "landing.html"));
   }
-  res.sendFile(path.join(process.cwd(), "public", "landing.html"));
+  res.sendFile(path.join(distPath, "index.html"));
 });
 bootstrapServer();
