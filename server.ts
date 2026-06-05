@@ -450,4 +450,12 @@ async function bootstrapServer() {
   });
 }
 
+// ─── LANDING PAGE ───
+app.get("/", (req, res) => {
+  const params = req.query;
+  if (params.tenant || params.register || params.view) {
+    return res.sendFile(path.join(process.cwd(), "dist", "index.html"));
+  }
+  res.sendFile(path.join(process.cwd(), "public", "landing.html"));
+});
 bootstrapServer();
