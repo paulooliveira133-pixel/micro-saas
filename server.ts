@@ -457,6 +457,7 @@ async function bootstrapServer() {
 
 // ─── LANDING PAGE ───
 app.get("*", (req, res) => {
+  const distPath = path.join(process.cwd(), "dist");
   if (req.path === "/" && !req.query.tenant && !req.query.register && !req.query.view) {
     return res.sendFile(path.join(process.cwd(), "public", "landing.html"));
   }
