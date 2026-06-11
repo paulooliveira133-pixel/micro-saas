@@ -1,3 +1,4 @@
+import PDFDocument from "pdfkit";
 import express from "express";
 import cors from "cors";
 import path from "path";
@@ -460,5 +461,215 @@ app.get("*", (req, res) => {
     return res.sendFile(path.join(process.cwd(), "public", "landing.html"));
   }
   res.sendFile(path.join(distPath, "index.html"));
+});
+
+app.get("/api/relatorio/pdf", async (req: any, res) => {
+  const tenantId = req.headers["x-tenant-id"] as string || req.query.tenant as string;
+  if (!tenantId) return res.status(400).json({ error: "Tenant não informado" });
+
+  const tenant = await prisma.tenant.findUnique({
+    where: { slug: tenantId },
+    include: {
+      appointments: { include: { service: true, professional: true }, orderBy: { createdAt: "desc" } },
+      services: true,
+      subscribers: { include: { plan: true } },
+    },
+  });
+
+  if (!tenant) return res.status(404).json({ error: "Tenant não encontrado" });
+
+  const PDFDocument = (await import("pdfkit")).default;
+  const doc = new PDFDocument({ margin: 50, size: "A4" });
+
+  res.setHeader("Content-Type", "application/pdf");
+  res.setHeader("Content-Disposition", `attachment; filename="relatorio-${tenantId}-${new Date().toISOString().slice(0,10)}.pdf"`);
+  doc.pipe(res);
+
+  const gold = "#C9A84C";
+  const dark = "#1A1A1A";
+  const gray = "#666666";
+  const light = "#999999";
+
+  // ─── HEADER ───
+  doc.rect(0, 0, doc.page.width, 80).fill(dark);
+  doc.fontSize(22).font("Helvetica-Bold").fillColor(gold).text("AgendaFácil", 50, 25);
+  doc.fontSize(10).font("Helvetica").fillColor("#AAAAAA").text("Relatório Gerencial", 50, 52);
+  doc.fontSize(9).fillColor("#777777").text(`Gerado em ${new Date().toLocaleDateString("pt-BR", { day:"2-digit", month:"long", year:"numeric" })}`, 50, 65);
+
+  // Nome do salão (direita)
+  doc.fontSize(12).font("Helvetica-Bold").fillColor(gold).text(tenant.name, 0, 30, { align: "right" });
+  doc.fontSize(9).font("Helvetica").fillColor("#AAAAAA").text(tenant.phone || "", 0, 48, { align: "right" });
+
+  doc.moveDown(3);
+
+  // ─── RESUMO EXECUTIVO ───
+  const apts = tenant.appointments;
+  const concluded = apts.filter(a => a.status === "concluido" || a.status === "concluído");
+  const canceled = apts.filter(a => a.status === "cancelado");
+  const pending = apts.filter(a => a.status === "agendado");
+  const totalRevenue = concluded.reduce((sum, a) => sum + (a.service?.price || 0), 0);
+  const avgTicket = concluded.length > 0 ? totalRevenue / concluded.length : 0;
+
+  doc.fontSize(13).font("Helvetica-Bold").fillColor(dark).text("Resumo Executivo", 50, doc.y);
+  doc.moveDown(0.3);
+  doc.moveTo(50, doc.y).lineTo(doc.page.width - 50, doc.y).strokeColor(gold).lineWidth(1).stroke();
+  doc.moveDown(0.8);
+
+  // Cards de resumo
+  const cardY = doc.y;
+  const cardW = (doc.page.width - 120) / 4;
+  const cards = [
+    { label: "Total Agendamentos", value: String(apts.length), color: gold },
+    { label: "Concluídos", value: String(concluded.length), color: "#4CAF50" },
+    { label: "Cancelados", value: String(canceled.length), color: "#E57373" },
+    { label: "Faturamento", value: `R$ ${totalRevenue.toFixed(2).replace(".", ",")}`, color: gold },
+  ];
+
+  cards.forEach((card, i) => {
+    const x = 50 + i * (cardW + 10);
+    doc.rect(x, cardY, cardW, 60).fill("#F8F8F8").stroke("#EEEEEE");
+    doc.fontSize(8).font("Helvetica").fillColor(gray).text(card.label, x + 8, cardY + 8, { width: cardW - 16 });
+    doc.fontSize(16).font("Helvetica-Bold").fillColor(card.color).text(card.value, x + 8, cardY + 24, { width: cardW - 16 });
+  });
+
+  doc.moveDown(5.5);
+
+  // Ticket médio e taxa de cancelamento
+  doc.fontSize(9).font("Helvetica").fillColor(gray)
+    .text(`Ticket médio: R$ ${avgTicket.toFixed(2).replace(".", ",")}`, 50, doc.y, { continued: true })
+    .text(`   |   Taxa de cancelamento: ${apts.length > 0 ? ((canceled.length / apts.length) * 100).toFixed(1) : 0}%`, { continued: true })
+    .text(`   |   Agendamentos pendentes: ${pending.length}`);
+
+  doc.moveDown(1.5);
+
+  // ─── SERVIÇOS MAIS PROCURADOS ───
+  doc.fontSize(13).font("Helvetica-Bold").fillColor(dark).text("Serviços mais procurados");
+  doc.moveDown(0.3);
+  doc.moveTo(50, doc.y).lineTo(doc.page.width - 50, doc.y).strokeColor(gold).lineWidth(1).stroke();
+  doc.moveDown(0.8);
+
+  const serviceCount: Record<string, { count: number; revenue: number }> = {};
+  apts.forEach(a => {
+    if (a.service) {
+      if (!serviceCount[a.service.name]) serviceCount[a.service.name] = { count: 0, revenue: 0 };
+      serviceCount[a.service.name].count++;
+      if (a.status === "concluido" || a.status === "concluído") {
+        serviceCount[a.service.name].revenue += a.service.price;
+      }
+    }
+  });
+
+  const sortedServices = Object.entries(serviceCount).sort((a, b) => b[1].count - a[1].count);
+
+  if (sortedServices.length === 0) {
+    doc.fontSize(9).fillColor(light).text("Nenhum serviço registrado ainda.");
+  } else {
+    // Header tabela
+    const colX = [50, 220, 330, 440];
+    doc.fontSize(8).font("Helvetica-Bold").fillColor(gray);
+    doc.text("Serviço", colX[0], doc.y);
+    doc.text("Agendamentos", colX[1], doc.y - doc.currentLineHeight());
+    doc.text("Receita", colX[2], doc.y - doc.currentLineHeight());
+    doc.text("% do total", colX[3], doc.y - doc.currentLineHeight());
+    doc.moveDown(0.3);
+    doc.moveTo(50, doc.y).lineTo(doc.page.width - 50, doc.y).strokeColor("#DDDDDD").lineWidth(0.5).stroke();
+    doc.moveDown(0.4);
+
+    sortedServices.slice(0, 8).forEach((([name, data], idx) => {
+      const rowY = doc.y;
+      if (idx % 2 === 0) doc.rect(50, rowY - 3, doc.page.width - 100, 18).fill("#FAFAFA");
+      const pct = apts.length > 0 ? ((data.count / apts.length) * 100).toFixed(1) : "0";
+      doc.fontSize(9).font("Helvetica").fillColor(dark).text(name, colX[0], rowY, { width: 160 });
+      doc.text(String(data.count), colX[1], rowY);
+      doc.text(`R$ ${data.revenue.toFixed(2).replace(".", ",")}`, colX[2], rowY);
+      doc.text(`${pct}%`, colX[3], rowY);
+      doc.moveDown(0.8);
+    }));
+  }
+
+  doc.moveDown(1);
+
+  // ─── AGENDAMENTOS RECENTES ───
+  if (doc.y > 650) doc.addPage();
+
+  doc.fontSize(13).font("Helvetica-Bold").fillColor(dark).text("Agendamentos Recentes");
+  doc.moveDown(0.3);
+  doc.moveTo(50, doc.y).lineTo(doc.page.width - 50, doc.y).strokeColor(gold).lineWidth(1).stroke();
+  doc.moveDown(0.8);
+
+  const recentApts = apts.slice(0, 15);
+
+  if (recentApts.length === 0) {
+    doc.fontSize(9).fillColor(light).text("Nenhum agendamento registrado ainda.");
+  } else {
+    const cols = [50, 130, 220, 330, 430];
+    doc.fontSize(8).font("Helvetica-Bold").fillColor(gray);
+    doc.text("Data", cols[0], doc.y);
+    doc.text("Hora", cols[1], doc.y - doc.currentLineHeight());
+    doc.text("Cliente", cols[2], doc.y - doc.currentLineHeight());
+    doc.text("Serviço", cols[3], doc.y - doc.currentLineHeight());
+    doc.text("Status", cols[4], doc.y - doc.currentLineHeight());
+    doc.moveDown(0.3);
+    doc.moveTo(50, doc.y).lineTo(doc.page.width - 50, doc.y).strokeColor("#DDDDDD").lineWidth(0.5).stroke();
+    doc.moveDown(0.4);
+
+    recentApts.forEach((apt, idx) => {
+      if (doc.y > 720) doc.addPage();
+      const rowY = doc.y;
+      if (idx % 2 === 0) doc.rect(50, rowY - 3, doc.page.width - 100, 18).fill("#FAFAFA");
+      const statusColor = apt.status === "concluido" || apt.status === "concluído" ? "#4CAF50" : apt.status === "cancelado" ? "#E57373" : gold;
+      doc.fontSize(8).font("Helvetica").fillColor(dark);
+      doc.text(apt.date || "-", cols[0], rowY, { width: 75 });
+      doc.text(apt.time || "-", cols[1], rowY, { width: 80 });
+      doc.text(apt.customerName || "-", cols[2], rowY, { width: 105 });
+      doc.text(apt.service?.name || "-", cols[3], rowY, { width: 95 });
+      doc.fillColor(statusColor).text(apt.status || "-", cols[4], rowY, { width: 80 });
+      doc.moveDown(0.8);
+    });
+  }
+
+  doc.moveDown(1);
+
+  // ─── CLIENTES / ASSINANTES ───
+  if (tenant.subscribers.length > 0) {
+    if (doc.y > 600) doc.addPage();
+    doc.fontSize(13).font("Helvetica-Bold").fillColor(dark).text("Assinantes Ativos");
+    doc.moveDown(0.3);
+    doc.moveTo(50, doc.y).lineTo(doc.page.width - 50, doc.y).strokeColor(gold).lineWidth(1).stroke();
+    doc.moveDown(0.8);
+
+    const subCols = [50, 220, 330, 430];
+    doc.fontSize(8).font("Helvetica-Bold").fillColor(gray);
+    doc.text("Cliente", subCols[0], doc.y);
+    doc.text("Telefone", subCols[1], doc.y - doc.currentLineHeight());
+    doc.text("Plano", subCols[2], doc.y - doc.currentLineHeight());
+    doc.text("Status", subCols[3], doc.y - doc.currentLineHeight());
+    doc.moveDown(0.3);
+    doc.moveTo(50, doc.y).lineTo(doc.page.width - 50, doc.y).strokeColor("#DDDDDD").lineWidth(0.5).stroke();
+    doc.moveDown(0.4);
+
+    tenant.subscribers.slice(0, 20).forEach((sub, idx) => {
+      if (doc.y > 720) doc.addPage();
+      const rowY = doc.y;
+      if (idx % 2 === 0) doc.rect(50, rowY - 3, doc.page.width - 100, 18).fill("#FAFAFA");
+      doc.fontSize(8).font("Helvetica").fillColor(dark);
+      doc.text(sub.customerName, subCols[0], rowY, { width: 165 });
+      doc.text(sub.customerPhone, subCols[1], rowY, { width: 105 });
+      doc.text(sub.plan?.name || "-", subCols[2], rowY, { width: 95 });
+      doc.fillColor(sub.status === "ativo" ? "#4CAF50" : "#E57373").text(sub.status, subCols[3], rowY);
+      doc.moveDown(0.8);
+    });
+  }
+
+  // ─── FOOTER ───
+  const pageCount = doc.bufferedPageRange().count;
+  for (let i = 0; i < pageCount; i++) {
+    doc.switchToPage(i);
+    doc.fontSize(8).font("Helvetica").fillColor(light)
+      .text(`AgendaFácil · ${tenant.name} · Página ${i + 1} de ${pageCount}`, 50, doc.page.height - 40, { align: "center", width: doc.page.width - 100 });
+    doc.moveTo(50, doc.page.height - 50).lineTo(doc.page.width - 50, doc.page.height - 50).strokeColor("#EEEEEE").lineWidth(0.5).stroke();
+  }
+
+  doc.end();
 });
 bootstrapServer();

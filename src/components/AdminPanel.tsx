@@ -585,6 +585,15 @@ export default function AdminPanel({ onOpenQRCode, salonId }: AdminPanelProps) {
               
               <div className="rounded-2xl border border-slate-800 bg-[#14161B] p-5 relative overflow-hidden flex items-center justify-between shadow-sm">
                 <div>
+                  {/* Botão exportar PDF */}
+                  <div className="flex justify-end mb-4">
+                      <button
+                         onClick={() => window.open(`/api/relatorio/pdf`, '_blank')}
+                         className="flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-black font-mono font-bold text-xs px-4 py-2 rounded-xl transition-colors"
+                         >
+                         📄 Exportar Relatório PDF
+                       </button>
+                  </div>
                   <span className="text-[10px] font-semibold text-slate-500 font-mono block">FATURAMENTO REALIZADO</span>
                   <p className="text-xl font-bold text-amber-500 mt-1 font-mono">{formatBRL(stats.revenue)}</p>
                   <span className="text-[10px] text-slate-400 mt-2 block font-mono">Conforme atendimentos marcados como concluídos</span>
