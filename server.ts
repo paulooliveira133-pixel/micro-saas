@@ -8,7 +8,156 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import * as dotenv from "dotenv";
 import bcrypt from "bcryptjs";
 import { Resend } from "resend";
+import helmet from "helmet";
+import rateLimit from "express-rate-limit";
+import { z } from "zod";
 dotenv.config();
+
+app.use(helmet({
+  contentSecurityPolicy: false, // Desabilitado pois o Vite precisa de inline scripts
+  crossOriginEmbedderPolicy: false,
+}));
+
+// ─── RATE LIMITING ───
+// Global: 100 requests por 15 minutos por IP
+const globalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  message: { error: "Muitas requisições. Tente novamente em alguns minutos." },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+app.use("/api", globalLimiter);
+
+// Auth: 10 tentativas por 15 minutos (anti-brute force)
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  message: { error: "Muitas tentativas de login. Tente novamente em 15 minutos." },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+app.use("/api/auth", authLimiter);
+
+// Registro: 5 cadastros por hora por IP
+const registerLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 5,
+  message: { error: "Limite de cadastros atingido. Tente novamente em 1 hora." },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+app.use("/api/saas/register", registerLimiter);
+
+// ─── SCHEMAS ZOD (validação de inputs) ───
+const appointmentSchema = z.object({
+  customerName: z.string().min(2, "Nome muito curto").max(100),
+  customerPhone: z.string().min(8, "Telefone inválido").max(20),
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Data inválida (use YYYY-MM-DD)"),
+  time: z.string().regex(/^\d{2}:\d{2}$/, "Hora inválida (use HH:MM)"),
+  serviceId: z.string().min(1, "Serviço obrigatório"),
+  professionalId: z.string().min(1, "Profissional obrigatório"),
+});
+
+const serviceSchema = z.object({
+  name: z.string().min(2, "Nome muito curto").max(80),
+  durationMin: z.number().int().min(5).max(480).optional(),
+  price: z.number().min(0).max(99999).optional(),
+});
+
+const registerSchema = z.object({
+  businessName: z.string().min(2, "Nome muito curto").max(100),
+  slug: z.string().min(2, "Identificador muito curto").max(50).regex(/^[a-z0-9-]+$/, "Use apenas letras minúsculas, números e hífens"),
+  phone: z.string().max(20).optional(),
+  email: z.string().email("Email inválido").optional().or(z.literal("")),
+  adminUsername: z.string().min(3, "Usuário muito curto").max(30),
+  adminPassword: z.string().min(6, "Senha muito curta").max(100),
+});
+
+// ─────────────────────────────────────────────────────
+// ALTERAÇÃO: Substitua o app.post("/api/appointments") por este (com validação Zod)
+// ─────────────────────────────────────────────────────
+app.post("/api/appointments", async (req: any, res) => {
+  const parsed = appointmentSchema.safeParse(req.body);
+  if (!parsed.success) {
+    return res.status(400).json({ error: parsed.error.errors[0].message });
+  }
+
+  const appointment = await prisma.appointment.create({
+    data: {
+      customerName: parsed.data.customerName,
+      customerPhone: parsed.data.customerPhone,
+      date: parsed.data.date,
+      time: parsed.data.time,
+      serviceId: parsed.data.serviceId,
+      professionalId: parsed.data.professionalId,
+      tenantId: req.tenant.id,
+      status: "agendado",
+    },
+  });
+
+  const tenant = req.tenant;
+  if (tenant.webhookUrl && tenant.whatsappApiKey) {
+    try {
+      await fetch(tenant.webhookUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${tenant.whatsappApiKey}` },
+        body: JSON.stringify({
+          phone: parsed.data.customerPhone,
+          message: `Olá ${parsed.data.customerName}! Seu agendamento está confirmado para ${parsed.data.date} às ${parsed.data.time}. Esperamos você!`,
+        }),
+      });
+    } catch (e) {}
+  }
+
+  res.json(appointment);
+});
+
+// ─────────────────────────────────────────────────────
+// ALTERAÇÃO: Substitua o app.post("/api/services") por este (com validação Zod)
+// ─────────────────────────────────────────────────────
+app.post("/api/services", async (req: any, res) => {
+  const parsed = serviceSchema.safeParse(req.body);
+  if (!parsed.success) {
+    return res.status(400).json({ error: parsed.error.errors[0].message });
+  }
+  const service = await prisma.service.create({
+    data: {
+      name: parsed.data.name,
+      durationMin: parsed.data.durationMin || 30,
+      price: parsed.data.price || 50,
+      tenantId: req.tenant.id,
+    },
+  });
+  res.json(service);
+});
+
+// ─────────────────────────────────────────────────────
+// ALTERAÇÃO: Substitua o app.post("/api/saas/register") por este (com validação Zod)
+// ─────────────────────────────────────────────────────
+app.post("/api/saas/register", async (req, res) => {
+  const parsed = registerSchema.safeParse(req.body);
+  if (!parsed.success) {
+    return res.status(400).json({ error: parsed.error.errors[0].message });
+  }
+
+  const { businessName, slug, phone, email, adminUsername, adminPassword } = parsed.data;
+  const cleanSlug = slug.toLowerCase().replace(/[^a-z0-9-]/g, "-");
+  const existing = await prisma.tenant.findUnique({ where: { slug: cleanSlug } });
+  if (existing) return res.status(409).json({ error: "Este identificador já está em uso. Tente outro." });
+
+  const hashedPassword = await bcrypt.hash(adminPassword, 10);
+  const trialEndsAt = new Date();
+  trialEndsAt.setDate(trialEndsAt.getDate() + 14);
+
+  const tenant = await prisma.tenant.create({
+    data: { name: businessName, slug: cleanSlug, phone: phone || "", adminUsername, adminPassword: hashedPassword, trialEndsAt, planStatus: "trial" },
+  });
+
+  if (email) await sendWelcomeEmail(email, businessName, cleanSlug);
+  return res.json({ success: true, slug: tenant.slug });
+});
+
 
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! });
