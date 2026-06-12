@@ -13,67 +13,6 @@ import rateLimit from "express-rate-limit";
 import { z } from "zod";
 dotenv.config();
 
-app.use(helmet({
-  contentSecurityPolicy: false, // Desabilitado pois o Vite precisa de inline scripts
-  crossOriginEmbedderPolicy: false,
-}));
-
-// ─── RATE LIMITING ───
-// Global: 100 requests por 15 minutos por IP
-const globalLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 100,
-  message: { error: "Muitas requisições. Tente novamente em alguns minutos." },
-  standardHeaders: true,
-  legacyHeaders: false,
-});
-app.use("/api", globalLimiter);
-
-// Auth: 10 tentativas por 15 minutos (anti-brute force)
-const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 10,
-  message: { error: "Muitas tentativas de login. Tente novamente em 15 minutos." },
-  standardHeaders: true,
-  legacyHeaders: false,
-});
-app.use("/api/auth", authLimiter);
-
-// Registro: 5 cadastros por hora por IP
-const registerLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000,
-  max: 5,
-  message: { error: "Limite de cadastros atingido. Tente novamente em 1 hora." },
-  standardHeaders: true,
-  legacyHeaders: false,
-});
-app.use("/api/saas/register", registerLimiter);
-
-// ─── SCHEMAS ZOD (validação de inputs) ───
-const appointmentSchema = z.object({
-  customerName: z.string().min(2, "Nome muito curto").max(100),
-  customerPhone: z.string().min(8, "Telefone inválido").max(20),
-  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Data inválida (use YYYY-MM-DD)"),
-  time: z.string().regex(/^\d{2}:\d{2}$/, "Hora inválida (use HH:MM)"),
-  serviceId: z.string().min(1, "Serviço obrigatório"),
-  professionalId: z.string().min(1, "Profissional obrigatório"),
-});
-
-const serviceSchema = z.object({
-  name: z.string().min(2, "Nome muito curto").max(80),
-  durationMin: z.number().int().min(5).max(480).optional(),
-  price: z.number().min(0).max(99999).optional(),
-});
-
-const registerSchema = z.object({
-  businessName: z.string().min(2, "Nome muito curto").max(100),
-  slug: z.string().min(2, "Identificador muito curto").max(50).regex(/^[a-z0-9-]+$/, "Use apenas letras minúsculas, números e hífens"),
-  phone: z.string().max(20).optional(),
-  email: z.string().email("Email inválido").optional().or(z.literal("")),
-  adminUsername: z.string().min(3, "Usuário muito curto").max(30),
-  adminPassword: z.string().min(6, "Senha muito curta").max(100),
-});
-
 // ─────────────────────────────────────────────────────
 // ALTERAÇÃO: Substitua o app.post("/api/appointments") por este (com validação Zod)
 // ─────────────────────────────────────────────────────
@@ -221,6 +160,67 @@ app.get("/api/auth/trial-status", async (req: any, res) => {
 });
 
 // ─── ESTABLISHMENT ───
+app.use(helmet({
+  contentSecurityPolicy: false, // Desabilitado pois o Vite precisa de inline scripts
+  crossOriginEmbedderPolicy: false,
+}));
+
+// ─── RATE LIMITING ───
+// Global: 100 requests por 15 minutos por IP
+const globalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  message: { error: "Muitas requisições. Tente novamente em alguns minutos." },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+app.use("/api", globalLimiter);
+
+// Auth: 10 tentativas por 15 minutos (anti-brute force)
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  message: { error: "Muitas tentativas de login. Tente novamente em 15 minutos." },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+app.use("/api/auth", authLimiter);
+
+// Registro: 5 cadastros por hora por IP
+const registerLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 5,
+  message: { error: "Limite de cadastros atingido. Tente novamente em 1 hora." },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+app.use("/api/saas/register", registerLimiter);
+
+// ─── SCHEMAS ZOD (validação de inputs) ───
+const appointmentSchema = z.object({
+  customerName: z.string().min(2, "Nome muito curto").max(100),
+  customerPhone: z.string().min(8, "Telefone inválido").max(20),
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Data inválida (use YYYY-MM-DD)"),
+  time: z.string().regex(/^\d{2}:\d{2}$/, "Hora inválida (use HH:MM)"),
+  serviceId: z.string().min(1, "Serviço obrigatório"),
+  professionalId: z.string().min(1, "Profissional obrigatório"),
+});
+
+const serviceSchema = z.object({
+  name: z.string().min(2, "Nome muito curto").max(80),
+  durationMin: z.number().int().min(5).max(480).optional(),
+  price: z.number().min(0).max(99999).optional(),
+});
+
+const registerSchema = z.object({
+  businessName: z.string().min(2, "Nome muito curto").max(100),
+  slug: z.string().min(2, "Identificador muito curto").max(50).regex(/^[a-z0-9-]+$/, "Use apenas letras minúsculas, números e hífens"),
+  phone: z.string().max(20).optional(),
+  email: z.string().email("Email inválido").optional().or(z.literal("")),
+  adminUsername: z.string().min(3, "Usuário muito curto").max(30),
+  adminPassword: z.string().min(6, "Senha muito curta").max(100),
+});
+
 app.get("/api/establishment", async (req: any, res) => {
   const tenant = req.tenant;
   res.json({
