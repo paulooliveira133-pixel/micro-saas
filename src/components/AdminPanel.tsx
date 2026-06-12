@@ -588,7 +588,7 @@ export default function AdminPanel({ onOpenQRCode, salonId }: AdminPanelProps) {
                   {/* Botão exportar PDF */}
                   <div className="flex justify-end mb-4">
                       <button
-                         onClick={() => window.open(`/api/relatorio/pdf`, '_blank')}
+                         onClick={() => window.open(`/api/relatorio/pdf?tenant=${salonId}`, '_blank')}
                          className="flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-black font-mono font-bold text-xs px-4 py-2 rounded-xl transition-colors"
                          >
                          📄 Exportar Relatório PDF
