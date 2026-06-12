@@ -455,15 +455,6 @@ async function bootstrapServer() {
   });
 }
 
-// ─── LANDING PAGE ───
-app.get("*", (req, res) => {
-  const distPath = path.join(process.cwd(), "dist");
-  if (req.path === "/" && !req.query.tenant && !req.query.register && !req.query.view) {
-    return res.sendFile(path.join(process.cwd(), "public", "landing.html"));
-  }
-  res.sendFile(path.join(distPath, "index.html"));
-});
-
 app.get("/api/relatorio/pdf", async (req: any, res) => {
   const tenantId = req.headers["x-tenant-id"] as string || req.query.tenant as string;
   if (!tenantId) return res.status(400).json({ error: "Tenant não informado" });
